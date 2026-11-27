@@ -71,7 +71,8 @@ ROLES = {
            "lens": "Medical lens: endpoints, dosing and titration, safety, adverse events of special interest and stopping rules."},
     "aud": {"name": "QA Auditor", "short": "Auditor", "docs": ALL_DOCS,
             "lens": "Quality lens: version control, cross-references between documents, GxP-relevant commitments and traceability."},
-    "adm": {"name": "AI Platform Admin", "short": "Admin", "docs": [], "lens": ""},
+    "adm": {"name": "AI Platform Admin", "short": "Admin", "docs": ALL_DOCS,
+            "lens": "Platform view: executive summary and key sections (read-only)."},
 }
 LENS_ROLES = ["com", "cra", "mr", "aud"]
 

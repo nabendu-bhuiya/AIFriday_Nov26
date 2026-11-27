@@ -107,7 +107,7 @@ def _out_for_doc(doc_id: int):
 
 
 @app.get("/api/documents")
-def list_docs(study: str | None = None, u: dict = Depends(need("com", "cra", "mr", "aud"))):
+def list_docs(study: str | None = None, u: dict = Depends(need("com", "cra", "mr", "aud", "adm"))):
     s = _study(study)
     docs = dash._docs(s, u["role"], current_only=False)
     out = []
@@ -121,7 +121,7 @@ def list_docs(study: str | None = None, u: dict = Depends(need("com", "cra", "mr
 
 
 @app.get("/api/documents/{doc_id}")
-def get_doc(doc_id: int, u: dict = Depends(need("com", "cra", "mr", "aud"))):
+def get_doc(doc_id: int, u: dict = Depends(need("com", "cra", "mr", "aud", "adm"))):
     d = db.q1("SELECT * FROM documents WHERE id=?", (doc_id,))
     if not d or d["doc_type"] not in ROLES[u["role"]]["docs"]:
         raise HTTPException(404, "Document not found or not in your role scope")

@@ -5,7 +5,7 @@ import { Pill, useLoad } from '../ui'
 const TYPES = [['', 'Auto-detect'], ['PROTOCOL', 'Clinical Protocol'], ['AMENDMENT', 'Protocol Amendment'], ['ICF', 'Informed Consent Form'],
   ['IB', "Investigator's Brochure"], ['SAP', 'Statistical Analysis Plan'], ['REG_SUBMISSION', 'Regulatory Submission'], ['DSMB_CHARTER', 'DSMB Charter'], ['OTHER', 'Other']]
 
-export default function Ingestion({ refresh }) {
+export default function Ingestion({ refresh, go }) {
   const [data, reload, err] = useLoad('/ingest/jobs')
   const [msg, setMsg] = useState('')
   const [meta, setMeta] = useState({ doc_type: '', version: '', study_id: '', phase: '' })
@@ -61,6 +61,8 @@ export default function Ingestion({ refresh }) {
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
               <b>{j.file_name}</b><Pill k={j.status === 'done' ? 'green' : j.status === 'error' ? 'red' : j.status === 'duplicate' ? 'grey' : 'amber'}>{j.status}</Pill>
               <span className="small muted">{j.created_at?.replace('T', ' ')} · {j.user}</span>
+              {['done', 'duplicate'].includes(j.status) && j.doc_id &&
+                <button className="btn" style={{ marginLeft: 'auto' }} onClick={() => go({ view: 'docs', id: j.doc_id })}>View summary</button>}
             </div>
             <div className="steps">{j.steps.map((s) => (
               <div key={s.name} className={`step ${s.status}`}><b>{s.status === 'running' && <span className="spin" />} {s.name}</b>{s.detail || s.status}</div>

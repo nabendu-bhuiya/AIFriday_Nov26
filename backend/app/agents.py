@@ -230,6 +230,26 @@ def n_verifier(s: AskState):
     return {"claims": kept, "grounded": round(grounded, 2)}
 
 
+def _restricted_hit(s: AskState) -> bool:
+    """Zero-token check: would an unrestricted search find the answer in a document type this role may not see?
+    Only content from the top results matters, and nothing from it is returned to the user."""
+    if not guardrails.enabled("scope"):
+        return False
+    allowed = set(ROLES[s["role"]]["docs"])
+    if allowed >= set(DOC_TYPES):
+        return False
+    rows, _ = vectorstore.hybrid_search(s["standalone"], s["study"], "aud", 3)
+    qt = set(vectorstore._terms(s["standalone"])) - {"study", "trial", "document", "documents", "please", "tell", "me", "give", "list"}
+    if not qt:
+        return False
+    for r in rows:
+        if r["doc_type"] not in allowed:
+            overlap = len(qt & set(vectorstore._terms(r["text"]))) / len(qt)
+            if overlap >= 0.5:      # relevant, not just the nearest neighbour
+                return True
+    return False
+
+
 def n_output_guard(s: AskState):
     with tracing.span("Output guard", "rules") as sp:
         if s.get("status") == "blocked":
@@ -241,6 +261,10 @@ def n_output_guard(s: AskState):
             leaks += n
         thr = db.grounding_threshold()
         g = s.get("grounded")
+        if (s.get("insufficient") or not s.get("claims")) and s["intent"] == "qa" and _restricted_hit(s):
+            sp["detail"] = "answer lives only in documents outside the role scope · withheld"
+            block = {"guard": "scope", "code": "SCOPE", "message": guardrails.RESTRICTED}
+            return {"status": "blocked", "message": guardrails.RESTRICTED, "blocked": block, "claims": []}
         if s.get("insufficient") or not s.get("claims"):
             status, msg = "insufficient", "The documents available to your role do not answer this question."
         elif guardrails.enabled("ground") and g is not None and g < thr:

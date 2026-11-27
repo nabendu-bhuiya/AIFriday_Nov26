@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { api, qs } from '../api'
 import { Cite, Pill, ReasonModal, useLoad } from '../ui'
 
 const STATUS = { draft: 'AI draft · awaiting reviewer', reviewed: 'Reviewer approved · awaiting QA e-signature', e_signed: 'E-signed GxP record',
   rejected: 'Rejected by QA', flagged: 'Flagged for correction', none: 'No summary' }
 
-export default function Documents({ user, study, route, tick, refresh, go }) {
+export default function Documents({ user, study, setStudy, route, tick, refresh, go }) {
   const [docs] = useLoad(`/documents${qs({ study })}`, [tick])
   const [sel, setSel] = useState(route.id || null)
   const [d, setD] = useState(null)
@@ -14,6 +14,15 @@ export default function Documents({ user, study, route, tick, refresh, go }) {
 
   useEffect(() => { if (!sel && docs?.length) setSel((docs.find((x) => x.current) || docs[0]).id) }, [docs, sel])
   useEffect(() => { if (sel) api(`/documents/${sel}`).then(setD).catch((e) => setErr(e.message)) }, [sel, tick])
+  // a shortcut (e.g. "View summary" after ingestion) may open a document of another study: switch the study once
+  const jumped = useRef(route.id || null)
+  useEffect(() => {
+    if (d && jumped.current === d.id) { jumped.current = null; if (d.study !== study) setStudy(d.study) }
+  }, [d, study, setStudy])
+  // when the user picks another study, drop a selection that belongs to the previous one
+  useEffect(() => {
+    if (docs?.length && docs[0].study === study && sel && !docs.some((x) => x.id === sel)) setSel(null)
+  }, [docs, sel, study])
 
   if (docs && !docs.length) return <div className="empty">No documents in your role scope yet.</div>
   const approve = async () => { try { await api(`/documents/${sel}/approve`, { method: 'POST' }); refresh() } catch (e) { setErr(e.message) } }
@@ -42,8 +51,10 @@ export default function Documents({ user, study, route, tick, refresh, go }) {
           <h3 style={{ fontSize: 15, marginTop: 4 }}>Executive summary</h3>
           {d.executive_summary.map((p, i) => <div key={i} className="claim">{p.text} <Cite c={p.cite} /></div>)}
 
-          <h3 style={{ fontSize: 15, marginTop: 8 }}>{d.lens_name} · for {user.role_name}</h3>
-          {d.lens.length ? d.lens.map((p, i) => <div key={i} className="claim">{p.text} <Cite c={p.cite} /></div>) : <div className="small muted">No role lens for this document type.</div>}
+          {user.role !== 'adm' && <>
+            <h3 style={{ fontSize: 15, marginTop: 8 }}>{d.lens_name} · for {user.role_name}</h3>
+            {d.lens.length ? d.lens.map((p, i) => <div key={i} className="claim">{p.text} <Cite c={p.cite} /></div>) : <div className="small muted">No role lens for this document type.</div>}
+          </>}
 
           {d.key_sections.length > 0 && <>
             <h3 style={{ fontSize: 15, marginTop: 8 }}>Key sections to read</h3>

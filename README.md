@@ -25,7 +25,7 @@ To check the LLM connection, sign in as `admin@pharma-demo.com` and open **Admin
 | rahul.das@pharma-demo.com | Clinical Research Associate |
 | anita.rao@pharma-demo.com | Medical Reviewer |
 | meera.iyer@pharma-demo.com | QA Auditor (GxP sign-off, audit trail) |
-| admin@pharma-demo.com | AI Platform Admin (observability, guardrails; no access to document content) |
+| admin@pharma-demo.com | AI Platform Admin (observability, guardrails; read-only executive summaries) |
 
 ## Architecture
 

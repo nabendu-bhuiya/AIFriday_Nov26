@@ -165,8 +165,6 @@ def kpis(study: str, role: str) -> list[dict]:
     fs = _findings(study, role)
     open_f = [f for f in fs if f["status"] in ("open", "raised")]
     docs = _docs(study, role)
-    rt = review_time(study, role)
-    rtk = {"label": "Review effort (est.)", "value": f"{rt['manual_h']}h → {rt['assisted_h']}h", "note": rt["basis"]}
     drafts = sum(1 for o in db.q("SELECT o.status, d.doc_type FROM outputs o JOIN documents d ON CAST(o.ref AS INTEGER)=d.id "
                                  "WHERE o.kind='summary' AND o.status='draft' AND o.study_id=?", (study,))
                  if SUMMARY_OWNER.get(o["doc_type"]) == role)
@@ -178,7 +176,7 @@ def kpis(study: str, role: str) -> list[dict]:
                  "mr": {"label": "Safety & endpoint items", "value": len(mine), "note": "dosing, endpoints, AESIs"}}[role]
         return [first,
                 {"label": "Open discrepancies", "value": len(open_f), "note": f"{sum(1 for f in open_f if f['severity'] == 'High')} high severity"},
-                {"label": "Summaries to approve", "value": drafts, "note": "AI drafts awaiting your review"}, rtk]
+                {"label": "Summaries to approve", "value": drafts, "note": "AI drafts awaiting your review"}]
     if role == "aud":
         o = {r["status"]: r["n"] for r in db.q("SELECT status, COUNT(*) n FROM outputs WHERE study_id=? GROUP BY status", (study,))}
         vr = sum(1 for r in version_refs(study) if not r["ok"])

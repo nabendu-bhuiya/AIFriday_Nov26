@@ -8,6 +8,8 @@ from . import db
 from .config import ROLES
 from .deid import deidentify
 
+RESTRICTED = "This information cannot be shared."
+
 GUARDS = [
     ("phi", "PHI / PII redaction", "Input", "Masks names, dates of birth, MRNs and contacts before any LLM call or indexing (HIPAA)."),
     ("phi_req", "Patient-identity request block", "Input", "Blocks questions asking who a patient or subject is."),
@@ -71,7 +73,7 @@ def check_input(question: str, role: str) -> dict | None:
                 "message": "Blocked by guardrail (prompt injection). Ask a question about the trial documents."}
     if enabled("phi_req") and _any(PHI_REQ, question):
         return {"guard": "phi_req", "code": "PHI",
-                "message": "Blocked by guardrail (PHI). Only de-identified data is available. Try site-level counts instead."}
+                "message": RESTRICTED}
     if enabled("topic") and _any(TOPIC, question):
         return {"guard": "topic", "code": "TOPIC",
                 "message": "Outside scope. TrialLens answers questions about the trial documents only, not personal medical advice."}
@@ -80,7 +82,7 @@ def check_input(question: str, role: str) -> dict | None:
         for dtype, rx in SCOPE_KEYWORDS.items():
             if dtype not in allowed and re.search(rx, question, re.I):
                 return {"guard": "scope", "code": "SCOPE",
-                        "message": f"Access denied (role scope). The {ROLES[role]['name']} role cannot query this document type."}
+                        "message": RESTRICTED}
     return None
 
 

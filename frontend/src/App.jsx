@@ -16,7 +16,7 @@ const NAV = {
   cra: [['dash', 'Dashboard'], ['docs', 'Documents & summaries'], ['disc', 'Discrepancies'], ['ver', 'Doc Audit Log']],
   mr: [['dash', 'Dashboard'], ['docs', 'Documents & summaries'], ['disc', 'Discrepancies'], ['ver', 'Doc Audit Log']],
   aud: [['dash', 'Dashboard'], ['signoff', 'GxP sign-off'], ['docs', 'Documents & summaries'], ['disc', 'Discrepancies'], ['ver', 'Doc Audit Log'], ['audit', 'Audit trail']],
-  adm: [['dash', 'Dashboard'], ['ingest', 'Ingestion'], ['admin', 'Admin console']],
+  adm: [['dash', 'Dashboard'], ['docs', 'Documents & summaries'], ['ingest', 'Ingestion'], ['admin', 'Admin console']],
 }
 const TITLES = { dash: 'Dashboard', docs: 'Documents & summaries', disc: 'Discrepancies', ver: 'Doc Audit Log', ingest: 'Ingestion',
   signoff: 'GxP sign-off', audit: 'Audit trail', admin: 'Admin console' }
@@ -45,7 +45,7 @@ export default function App() {
   const view = nav.some(([k]) => k === route.view) ? route.view : 'dash'
   const go = (r) => setRoute(typeof r === 'string' ? { view: r } : r)
   const refresh = () => { setTick((t) => t + 1); loadMe() }
-  const props = { user, study, go, route, tick, refresh }
+  const props = { user, study, setStudy, go, route, tick, refresh }
   const initials = user.role_name.split(' ').filter((w) => /^[A-Z]/.test(w)).map((w) => w[0]).join('').slice(0, 3)
   const cur = studies.find((s) => s.study_id === study)
 
@@ -72,7 +72,7 @@ export default function App() {
           <h1 style={{ fontSize: 20 }}>{TITLES[view]}</h1>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
             <span className="avatar" aria-hidden="true">{initials}</span>
-            <span style={{ fontSize: 14, fontWeight: 600 }}>{user.role_name}</span>
+            <div><div style={{ fontSize: 14, fontWeight: 600 }}>{user.role_name}</div><div className="small muted">{user.email}</div></div>
           </div>
         </div>
         {view === 'dash' && <Dashboard {...props} />}

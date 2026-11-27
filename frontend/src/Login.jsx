@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api, setToken } from './api'
 
-const DEMO = ['priya.sharma@pharma-demo.com', 'rahul.das@pharma-demo.com', 'anita.rao@pharma-demo.com', 'meera.iyer@pharma-demo.com', 'admin@pharma-demo.com']
-
 export const Logo = ({ size = 32 }) => (
   <svg width={size} height={size} viewBox="0 0 36 36" aria-hidden="true"><rect x="2" y="2" width="32" height="32" rx="8" fill="none" stroke="#9CCBF2" strokeWidth="2.5" /><path d="M10 18h5l3-7 4 14 3-7h3" fill="none" stroke="#9CCBF2" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
 )
@@ -53,11 +51,6 @@ export default function Login({ onLogin }) {
           </div>
           {err && <div className="err">{err}</div>}
           <button className="btn" type="submit" disabled={!role?.found || !pwd}>Sign in</button>
-          <div className="small muted">Demo accounts (any password)
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 10px', marginTop: 4 }}>
-              {DEMO.map((d) => <button type="button" key={d} className="linkbtn" onClick={() => setEmail(d)}>{d}</button>)}
-            </div>
-          </div>
         </form>
       </section>
     </div>

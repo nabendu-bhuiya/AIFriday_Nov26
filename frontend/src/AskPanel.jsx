@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { api } from './api'
-import { Cite, useLoad } from './ui'
+import { Cite } from './ui'
 
 function Answer({ m, go }) {
   if (m.error) return <div className="a blocked">{m.error}</div>
@@ -26,7 +26,6 @@ export default function AskPanel({ user, study, go, onAnswer }) {
   const [msgs, setMsgs] = useState([])
   const [q, setQ] = useState('')
   const [busy, setBusy] = useState(false)
-  const [sugg] = useLoad('/ask/suggestions', [user.role])
   const end = useRef(null)
   useEffect(() => { end.current?.scrollIntoView({ behavior: 'smooth' }) }, [msgs, busy])
 
@@ -52,9 +51,6 @@ export default function AskPanel({ user, study, go, onAnswer }) {
         {msgs.map((m, i) => m.q ? <div key={i} className="q">{m.q}</div> : <Answer key={i} m={m} go={go} />)}
         {busy && <div className="a"><span><span className="spin" /> Agents working: guard → route → retrieve → answer → verify</span></div>}
         <div ref={end} />
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {(sugg || []).map((s) => <button key={s} className="sugg" onClick={() => send(s)}>{s}</button>)}
       </div>
       <div style={{ display: 'flex', gap: 6 }}>
         <input className="input" style={{ flex: 1, minWidth: 0, height: 46, fontSize: 14 }} aria-label="Ask a question" placeholder="Ask about the documents…"
