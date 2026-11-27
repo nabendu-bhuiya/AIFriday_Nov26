@@ -1,0 +1,11 @@
+.env
+data/triallens.db
+data/chroma/
+__pycache__/
+node_modules/
+frontend/dist/
+data/*
+!data/repository/
+data/repository/*
+!data/repository/.gitkeep
+*.log

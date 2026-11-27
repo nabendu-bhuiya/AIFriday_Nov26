@@ -1,0 +1,432 @@
+
+/
+Nabendu, Not connected
+
+Provide solition approach for the hackathon
+
+My recommendation: don’t compete on summarization. Every team will build “upload PDF → summary → RAG chat”. Win on traceability and cross-document compliance checks. Those map to the hardest pain points in the brief (error-prone cross-referencing, compliance gaps), and most teams will skip them.
+
+Positioning
+“TrialLens: every answer cited, every inconsistency caught.”
+
+Three things that make it stand out
+Citation-first summaries. Every summary sentence links to the page and paragraph it came from, and clicking it highlights the source. A second LLM pass checks each sentence against its source and drops anything unsupported. That gives you a concrete answer to “high accuracy”.
+Cross-document consistency checker (the main feature). It pulls the same items from the Protocol, Consent Form and regulatory submission (inclusion/exclusion criteria, dosing, visit schedule, risks) into a JSON schema, then compares them. Example output: “Consent form lists 6 visits; protocol v2.1 lists 8.”
+Role-based summary views. The same document gets a different summary for Regulatory, Clinical Ops and Medical reviewers, each following a template based on ICH E6/E3 sections. It also shows role-based access visibly instead of just stating it.
+Optional extra: amendment diff, which summarizes what changed from Protocol v1 to v2 and what that affects.
+
+Architecture (kept simple)
+Ingestion: connector to the document management system (a mock API is fine) or upload → PyMuPDF to extract text → chunking by section heading → metadata (study, phase, doc type, version)
+HIPAA gate: Presidio de-identification runs before anything reaches the LLM, and redaction counts are logged
+Store: pgvector, with role tags as metadata filters so access control is enforced at retrieval time
+LLM: a pretrained model through a private endpoint (Azure OpenAI or Bedrock) with zero data retention. No fine-tuning, which matches the constraint.
+Retrieval: hybrid BM25 plus vector search. Medical terms and drug names need exact keyword matching.
+Audit: hash-chained, append-only log of who asked what, which chunks were used and the model version. This makes it tamper-evident, in the spirit of 21 CFR Part 11 and GxP.
+UI: React or Streamlit with three tabs: Summary, Chat and Consistency Report
+Data and evaluation
+Generate 2–3 synthetic trials (protocol, consent form, submission) and deliberately plant 5–6 inconsistencies in them
+Metrics: faithfulness score (RAGAS), share of planted gaps detected, and review time compared with a manual baseline
+Demo flow (5 minutes)
+Upload → the de-identification gate fires → role-based summary with clickable citations → chat query → consistency report finds the planted gaps live (this is the high point) → audit log view → switch role and show an access denial.
+
+To help me narrow this down:
+
+How long is the build window?
+How big is your team?
+Which cloud are you allowed to use: Azure or AWS?
+Want me to put this on a Whiteboard?
+
+.env
+3 hours build window, 2 team members , individual laptop to host the app, attached env details are given , VSCode is the IDE
+
+With 3 hours and 2 people, keep the three main features but build them as simply as possible: one Streamlit app, with no database server and no Docker.
+
+Scope cuts for 3 hours
+Vector store: numpy cosine similarity held in memory instead of pgvector. A few hundred chunks is plenty for a demo.
+Document management integration: a local repository/ folder that acts as a mock document system, plus an upload option.
+De-identification: regex rules for names, dates, MRNs, phone numbers and emails, plus a count of redactions. Skip Presidio, because downloading its spaCy model can cost you 20 minutes.
+Role-based access: a role dropdown at login with a hardcoded mapping of roles to document types.
+Audit: SQLite (built into Python) with a SHA-256 hash chain linking each log entry to the previous one.
+Amendment diff: only if you have spare time at the end.
+Which model for which job
+Task	Model
+Summaries, extraction, chat	azure/genailab-maas-gpt-4.1-mini
+Consistency judging and citation verification	azure/genailab-maas-gpt-4.1
+Embeddings	azure/genailab-maas-text-embedding-3-large
+Fallback	gemini-2.5-flash
+Avoid DeepSeek-R1 and the Phi reasoning models. They’re too slow for a live demo.
+
+Stack: Python, streamlit, openai (with base_url set to the lab endpoint), pypdf, numpy, python-dotenv.
+
+Timeline
+Time	Person A (AI/backend)	Person B (UI/data)
+0:00–0:20	Set up venv, test one chat call and one embedding call	Generate synthetic Protocol, Consent Form and submission with gpt-4.1, with 5–6 planted inconsistencies
+0:20–1:30	Chunking with IDs like [PROT-p4-¶2], embeddings, cited summaries, extraction for the consistency check plus the judge step	Streamlit tabs (Summary / Chat / Consistency / Audit), role login, de-id module, audit log
+1:30–2:15	Integrate, add the verification pass that drops unsupported sentences	Clickable citations, colour-coded consistency report
+2:15–2:40	Score results: planted gaps caught x/6, time saved	Polish, add a role-denied screen
+2:40–3:00	Rehearse the demo together, prepare one architecture slide	
+Two risks to check before 0:20
+SSL or proxy errors: corporate lab endpoints often fail certificate verification. If the first call errors, pass http_client=httpx.Client(verify=False) to the OpenAI client.
+Model names: the endpoint looks like a LiteLLM proxy, so use the model names exactly as written in the .env, including the azure/ prefix.
+Also, your .env has a live API key. Add it to .gitignore before anything gets pushed.
+
+Should I generate the full starter code now (app, ingestion, retrieval, prompts, audit log and the synthetic document generator) so you can run it in VS Code in the first 15 minutes?
+
+Provide design approach and UI prototype including Admin screen for audit logging, AI observability . I want to built Agentic AI system - showcase innovation in features as well as optimize token usage , guardrail implementation,  AI Observability , Responsible AI. The roles we will provide in the app are : Expected roles: 
+
+Clinical Operations Manager    Monitor clinical study execution and protocol requirements
+Clinical Research Associate (CRA)    Review study documentation and identify site-level discrepancies
+Medical Reviewer    Review clinical information, endpoints and safety-related content
+
+I’ll set out the agentic design and build a clickable UI prototype with the three role views and the admin console. First I’ll check which artifact formats are available.
+
+TrialLens – Agentic Clinical Trial Assistant
+Claude Design
+·Only you
+Canvas created. Now writing the index and the sign-in screen.
+
+I’ve built the prototype on a design canvas. It has three clickable screens, and every tab, role switch and toggle works.
+
+Sign-in: the user picks a role, which decides which documents and agents they can use.
+Reviewer workspace:
+A role switcher changes the whole screen between Clinical Ops Manager, CRA and Medical Reviewer: the summary, suggested questions and discrepancy list.
+Tabs: Summary (every point cited), Ask (includes a live example of a blocked request for patient data) and Discrepancies (raise or dismiss, with a reason).
+An agent trace panel shows each step’s tokens, time and cost.
+Admin console:
+AI observability: headline numbers, the agent pipeline, tokens by model, where tokens were saved, recent traces.
+Audit trail: a hash-chained log with a “chain verified” banner.
+Guardrails & Responsible AI: on/off switches for each guardrail, plus a Responsible AI scorecard.
+All figures on the screens are made-up sample data. Replace them with your real numbers after your test runs.
+
+Agent design (doable in 3 hours)
+Write each agent as a plain Python function wrapped in a @traced decorator that logs to SQLite. Skip LangGraph: setting it up eats time you don’t have.
+
+Agent	Model	Job
+Input guard	regex + rules	Block patient-data requests and prompt injection, check the request fits the user’s role
+Router	gpt-4.1-nano	Classify the request as summary, Q&A or consistency check
+Retriever	no LLM	Keyword + vector search, filtered by role
+Specialist	gpt-4.1-mini	Summarize, answer questions or extract facts
+Consistency judge	gpt-4.1	Compare facts across documents
+Verifier	gpt-4.1-mini	Check each claim against its citation, drop unsupported ones
+Output guard	rules	Scan for leaked patient data, add the AI-content disclaimer
+How each theme shows up in the demo
+Token optimization: a summary of each section is built once at ingest and reused for all three roles. Repeat questions are served from a cache. The cheapest model does routing, only the top 6 chunks go into the prompt, and output length is capped. The admin console shows the tokens saved.
+Guardrails: checks run at four points: before the LLM sees the input, at retrieval, on the output, and as a per-request token budget. Every block is written to the audit trail.
+Observability: one trace per request, with one entry per agent step (model, tokens, time, cost, grounding score). The workspace shows it to the reviewer and the admin console rolls it up.
+Responsible AI: every answer carries citations and an AI-generated label. Answers that score low on grounding are withheld. Agents only suggest; a human approves or dismisses. Patient data never reaches the LLM.
+Split for the two of you
+Person A: the agents and the @traced decorator.
+Person B: turning these three screens into Streamlit pages, all reading from the same SQLite tables.
+Should I generate the Python starter code next, with the agents, tracing, audit hash chain and Streamlit pages matching these screens?
+
+
+Every user should see the dashboard in attached format after login . The Admin console will only have the Agent Trace as additional tab, other personna don't need it.  The chat interface "Ask" should be available in the right hand window all time for all users.  Regenerate the prototype,  be cautious on token usage.
+
+I’ll rebuild it as a single app shell. Every role lands on a dashboard after login, with the Ask chat docked on the right. The admin console becomes a sidebar section only the Admin role sees, with Agent Trace as its extra tab. To keep tokens down, I’ll edit the existing screens rather than rewrite them.
+
+TrialLens – Agentic Clinical Trial Assistant
+Claude Design
+·Only you
+I rebuilt the prototype with the dashboard layout from your screenshot, in TrialLens branding.
+
+Every role lands on a dashboard. A dark-teal menu on the left, a greeting banner, four role-specific headline cards, a documents chart, a discrepancy-status chart and an upcoming-deadlines list. The cards and greeting change per role, for example open site queries and pending re-consents for the CRA, or safety items for the Medical Reviewer.
+Ask is always docked on the right for all roles, on every screen. Its suggested questions change by role, and it still shows the example of a blocked patient-data request.
+The admin console only appears in the Admin role’s menu. It keeps its Observability, Audit trail and Guardrails tabs and adds an Agent trace tab, which shows each step of one request with its model, tokens, time and result. The trace panel is gone from the other roles’ screens.
+Sign-in sends every role to the dashboard. Each screen remembers its own state, so a choice on the sign-in page doesn’t carry over. Pick the role with the “Viewing as” switcher at the top of the dashboard.
+To keep token use down, I edited the existing screens instead of rewriting them. Open the dashboard and choose Admin, then Admin console, to see the trace tab.
+
+Next step: shall I generate the Streamlit starter code with this layout? I’d use st.columns for the main area plus a docked Ask column, and SQLite tables behind the dashboard cards.
+
+
+
+1) All persona apart from Admin  need The doc version monitor option in the left panel.  the summary section of the dashboard for each persona should have scorecard for confidence score. 2) Dashboard should  highlight the pending action of each persona,
+
+I’ll add the Doc version monitor to the menu for the three non-Admin roles, and a confidence scorecard plus highlighted pending actions to every role’s dashboard.
+
+TrialLens – Agentic Clinical Trial Assistant
+Claude Design
+·Only you
+I’ve updated the app screen with all three changes, editing only that screen to keep token use down.
+
+1. Pending actions at the top of every dashboard. An amber box sits right under the greeting with three actions each, marked High or Medium, with a due date and a button:
+
+Clinical Ops Manager: approve the ICF update, roll out Amendment 2.
+CRA: raise the site 012 query, confirm re-consent.
+Medical Reviewer: titration mismatch, missing hypoglycaemia risk in the ICF.
+Admin: injection attempts, withheld answers, re-check the audit chain.
+2. Confidence scorecard on every dashboard. A ring shows the overall confidence score, next to your five indicators:
+
+Document completeness
+Version consistency
+Cross-document consistency
+Evidence coverage
+Review status
+Each indicator has a bar, a percentage, a word label (Good, Watch or Act, so it doesn’t rely on colour alone) and a one-line finding. Scores differ by role, so a CRA sees a lower review status than a Clinical Ops Manager.
+
+3. Doc version monitor in the left menu for the three non-Admin roles only. It uses the three-column layout from your eTMF screenshot (section, then document, then detail):
+
+Click a document to see its version history and a compatibility check, for example “ICF v1.3 still references Protocol v2.0”.
+The missing DSMB Charter shows as a “No version” placeholder with a Request from owner button.
+The scores on screen are made-up sample values. Here’s how you’d compute each one in the build, with no extra LLM calls except where noted:
+
+Indicator	How to calculate it
+Completeness	Documents present ÷ a checklist of expected documents for the study phase
+Version consistency	Version references pulled from each document (one regex or a nano call at ingest), matched against the latest version on file
+Cross-document consistency	1 − (open conflicts ÷ facts compared), taken from the consistency agent’s results
+Evidence coverage	Claims that passed the Verifier ÷ total claims
+Review status	Findings a human has validated ÷ all findings, from the audit table
+Want the Python code for the scorecard calculation and the version checker next?
+
+
+
+
+1) Introduce a new persona called "Auditor", attaching the reference prototype. This persona dashboard should highlight the section which will required Human in the loop must as this is GxP validate  system, quality assurance is the prototype, refer quality assurance attachment  2) reference attachment for dashboard of Clinical research associate and clinical ops manager
+
+I’ll add an Auditor (QA) role with a GxP sign-off dashboard, and give the Clinical Ops Manager and CRA their own dashboard panels based on your references, in TrialLens styling.
+
+TrialLens – Agentic Clinical Trial Assistant
+Claude Design
+·Only you
+The app screen now has the new Auditor role and dashboards modeled on your Clinical Ops Manager and CRA references. Use the role switcher at the top to see each one. Every role still has the pending-actions box, the confidence scorecard and the Ask panel on the right.
+
+1. Auditor (QA), based on your quality assurance reference. A red-bordered “GxP · Human sign-off required” panel sits at the very top. Each AI output moves through four steps: AI draft, Reviewer, QA review (the Auditor) and e-signature. Each item shows where it is in those steps, with a Review & sign, Remind or Assess button. The banner says plainly that AI output isn’t a GxP record until it’s e-signed. Below that:
+
+AI output lifecycle: Draft 12 → Under human review 7 → Approved 24 → E-signed 21.
+Document version control: a table of documents with Active, Superseded and In review labels.
+Traceability for one finding: source page → agent run → human decision → audit-trail entry.
+Superseded but still referenced: for example, Protocol v2.0 still cited by ICF v1.3.
+The Auditor also gets the Doc version monitor and appears as QA Auditor on the sign-in screen.
+
+2. Clinical Ops Manager, based on your Veeva reference:
+
+Rings for sites active, subjects enrolled and subjects completed.
+Monitoring compliance: 2 of 6 visits overdue, 64% of visit reports on time against an 80% target.
+My tasks, with overdue dates in red.
+A bar chart of sites by monitoring phase.
+3. CRA, based on your Quanticate reference:
+
+Open queries by type (SDV, Source, Image, Meta, EDC).
+Rings for queries resolved and ICF versions reviewed.
+Lists of ICF versions pending review and queries waiting for the CRA’s review.
+The Medical Reviewer and Admin dashboards keep the general layout. All figures are made-up sample values, and the layouts follow your references without copying their branding.
+
+For the build: the Auditor’s sign-off queue is just a status column on the outputs table plus an e-signature entry in the audit trail (user, time, reason, hash), so it adds no LLM cost.
+
+The Auditor doesn’t have a read-only Audit trail screen in the menu yet. Should I add one?
+
+Dashboard has long scroll bar - suggestion to reduce it
+
+The page is long because six full-width sections are stacked on top of each other. For the Auditor that’s roughly 1,800 px, so about two screens. These changes would fit each dashboard on about one 900 px screen, with nothing removed:
+
+Shrink the greeting to a single line and move the four headline numbers into it. The big banner and illustration take about 150 px and are mostly decoration. Saves about 200 px.
+Put pending actions and the scorecard side by side. Each takes half the width. The scorecard keeps the ring and five bars, and each indicator’s one-line explanation appears on hover or tap. Saves about 300 px.
+For the Auditor, merge the sign-off queue into pending actions. They currently show the same items twice. The red GxP border and label move onto the merged box, so it still stands out. Saves about 220 px for the Auditor.
+Lay out the role-specific panels in a two-by-two grid of equal-height cards. Lists show their top three items with a “View all” link, and the extra rows scroll inside the card. Saves about 300 px.
+Keep the Ask panel pinned to the window height, so it stays in place while the middle column scrolls.
+Together these bring it down to about 950–1,000 px. Scores, actions, charts and the GxP warning all stay above the fold, and none of it changes the features.
+
+Should I apply all five? Or skip any, for example number 3 if you’d rather keep the Auditor’s sign-off queue as a separate panel for the GxP story?
+
+I want to keep Ask panel as it is , how can I  change the layout
+
+I can make changes 1–4 for you and leave the Ask panel exactly as it is. Or, if you’d rather change the layout yourself, you can edit it directly on the canvas:
+
+Open the canvas and double-click the App artboard (board 2) to start editing it.
+To put two sections side by side (for example, pending actions and the scorecard), select both, then choose “Wrap in flex”. In the properties panel, set the direction to Row and give each one a width of 50%.
+To shorten the greeting banner, select it, reduce its padding and height, and delete the illustration.
+To make a grid of cards for the role-specific panels, select them and choose “Wrap in grid” with 2 columns.
+To stop a card growing too tall, select it and set a max height (about 280 px) with overflow set to scroll.
+Some limits of doing it by hand:
+
+Sections that only show for one role (the Auditor’s sign-off queue, the Clinical Ops Manager’s and CRA’s panels) only appear on the canvas for the role currently selected. You’d have to repeat the edit for each role.
+Hover-to-reveal descriptions on the scorecard, and merging the Auditor’s sign-off queue into pending actions, need code changes. The editor can’t do those.
+My recommendation: let me apply changes 1–4 to all five roles in one pass, then you fine-tune spacing on the canvas. Shall I go ahead?
+
+yes
+
+TrialLens – Agentic Clinical Trial Assistant
+Claude Design
+·Only you
+I’ve applied changes 1–4 to all five roles, and the Ask panel is unchanged. By my estimate, the dashboard is now about 1,100 px tall instead of about 1,900 px. I didn’t open it in a browser to check, so please give it a quick look.
+
+Single-line greeting. The banner and illustration are gone. The greeting now sits in one strip with the four headline numbers as small tiles beside it. Hover a tile to see its note.
+Pending actions and scorecard side by side. The scorecard has a smaller confidence ring and five bars with their Good/Watch/Act labels. Each indicator’s one-line finding now appears when you hover its row.
+Auditor boxes merged. The Auditor’s pending-actions box is now the red-bordered “GxP · Human sign-off required” box, with the 21 CFR Part 11 note. It lists the 4 sign-off items, each with its approval trail (for example “AI ✓ · Reviewer ✓ · QA review pending”), plus the overdue fix-up action (CAPA) for Protocol v2.0.
+Smaller role panels. Rings and bar charts are smaller, and the Clinical Ops Manager’s task list shows the top 3 with a “View all 5” link.
+One trade-off: hover doesn’t work on phones or tablets, so the scorecard findings won’t show there. That’s fine for a laptop demo. If you’ll present on a touch screen, I can make each row tap to expand instead.
+
+The 2 tabs on top of pending action items - i) pending  action  ii) completed . Remove My tasks, Sites by monitoring phase section ii) Rename "Doc version monitor " as "Doc Audit Log"
+
+TrialLens – Agentic Clinical Trial Assistant
+Claude Design
+·Only you
+I’ve made all three changes to the dashboard:
+
+Pending and Completed tabs now sit at the top of the action box for every role, with counts, for example “Pending (3)” and “Completed (2)”. Completed items have a green “Done” label, a completion date and a “View” button. On the Auditor’s red GxP box, completed items show the e-signature date and the matching audit-trail entry.
+My tasks and Sites by monitoring phase are removed from the Clinical Ops Manager dashboard. It now ends with the Site status & enrollment and Monitoring compliance panels, which makes the page shorter again.
+“Doc version monitor” is now “Doc Audit Log” in the left menu and in the page title, for all four roles that have it (everyone except Admin).
+For the build, the two tabs only need a status column (pending or done) and a completed_at timestamp on the actions table. Marking an action done should also write an audit-trail entry, so the Completed tab and the Auditor’s trail always match.
+
+generate a clickable html prototype of this version and save it at "Y:\Hackathon\Kolkatta\Gitanjali Park\Kolkata_AI_Friday_27-11-26_Master\Team_Kolkata_2_AmgenAI Avengers"
+
+I’ll package the three screens into one standalone HTML file that runs offline, then try to save it to that folder on your computer.
+
+I couldn’t save the prototype to your Y: folder. The link to your computer isn’t connected right now (I tried twice), so I’ve attached TrialLens_Prototype.html here instead.
+
+To save it to Y: yourself: download the file and copy it to Y:\Hackathon\Kolkatta\Gitanjali Park\Kolkata_AI_Friday_27-11-26_Master\Team_Kolkata_2_AmgenAI Avengers.
+
+To have me save it there: open this chat in the Claude desktop app on that laptop, choose Add folder from the + menu, and pick that folder. Then tell me to retry and I’ll write the file straight into it. Y: looks like a network drive, so it has to be added as a connected folder before I can write to it.
+
+About the file:
+
+It’s one file of about 80 KB and opens offline in any browser. The only thing it fetches online is the IBM Plex font; without internet it falls back to system fonts.
+Everything from the current canvas is clickable:
+sign-in with all five roles
+the dashboard with Pending and Completed tabs and the scorecard
+Documents & summaries, Discrepancies and Doc Audit Log
+the Ask panel on every screen
+the Admin console, including the Agent trace tab
+One improvement over the canvas: the role you pick at sign-in now carries into the dashboard, so choosing QA Auditor opens the Auditor’s GxP view directly. You can still switch roles at the top.
+I tested it by running the full click path in a simulated browser (sign-in, Auditor dashboard, Completed tab, Doc Audit Log, Admin console, Agent trace). Every screen rendered with no script errors, but I haven’t opened it in a real browser.
+TrialLens Prototype
+Code
+·HTML
+i) The login page should be user email id and password driven. Once user feed the email id , the role will be auto displayed
+ii) The theme of the app through light blue based.
+iii) Top bar beside dashboard should display only the current user role
+iv) the button size across page should remain same
+v) "Your pending action" should be renamed as " My Word"
+v) No "i" for information icon is required.
+
+Regenerate the html prototype
+
+I’ll apply all six changes to the canvas screens, then rebuild the standalone HTML from them.
+
+TrialLens – Agentic Clinical Trial Assistant
+Claude Design
+·Only you
+I’ve rebuilt the clickable prototype as TrialLens_Prototype.html with all six changes, and updated the canvas to match. I still couldn’t reach your computer, so it isn’t in the Y: folder; download it from here and copy it across.
+
+Email and password sign-in. As you type an email, the role appears underneath it automatically. An unknown email shows “No role found” and the Sign in button stays greyed out. The demo accounts are listed under the form, and clicking one fills in the email:
+priya.sharma@pharma-demo.com: Clinical Operations Manager
+rahul.das@pharma-demo.com: Clinical Research Associate
+anita.rao@pharma-demo.com: Medical Reviewer
+meera.iyer@pharma-demo.com: QA Auditor
+admin@pharma-demo.com: AI Platform Admin
+Any password works.
+Light-blue theme across all screens: a blue side menu, light-blue page background and greeting strip, blue buttons and highlights.
+The top bar shows only the signed-in user: initials, name and role, for example “Meera Iyer · QA Auditor”. The role switcher and study selector are gone, so the role comes only from the email you sign in with.
+All action buttons are now the same size, 40 px tall with the same text size and corners. Menu items, tabs, on/off switches and the demo email links keep their own styles.
+“Your pending actions” is now “My Work”. For the Auditor it reads “My Work · GxP sign-off required (4)”.
+The info-style icon in that box’s heading is removed.
+You wrote “My Word”; I’ve assumed you meant “My Work”. Tell me if you want exactly “My Word”.
+
+I tested sign-in in a simulated browser: an unknown email, then a demo account, then the Auditor’s dashboard all worked with no script errors.
+
+To save straight to Y: next time, open this chat in the Claude desktop app on that laptop and add the folder with + → Add folder.
+
+TrialLens Prototype
+Code
+·HTML
+i) no Need to show count after My Work, ii) The button sizes in a section like review , open, approve should be same
+
+TrialLens – Agentic Clinical Trial Assistant
+Claude Design
+·Only you
+I’ve updated TrialLens_Prototype.html and the canvas with both changes. I checked that sign-in and the dashboard still load without errors, but I haven’t looked at the button layout on screen.
+
+No count after “My Work”. The heading is now just “My Work”, or “My Work · GxP sign-off required” for the Auditor. The Pending and Completed tabs still show their counts; tell me if you want those removed too.
+Same-size action buttons. Every action button (Review, Open, Approve, Raise query, Review & sign, and so on) is now the same size: 40 px tall and at least 150 px wide, with the label centred. Buttons sit in a neat column in My Work, the Discrepancies table and the admin console. The one exception is the Ask panel’s send-arrow button, which stays a small square.
+I still can’t reach your computer, so copy the file to the Y: folder yourself, or open this chat in the Claude desktop app and add that folder so I can save it there directly.
+
+TrialLens Prototype
+Code
+·HTML
+Is the current prototype covers all the current challenge and business impact in the given prototype
+
+Mostly yes. All four challenges are covered, but three things the judges will look for are only partly shown: document ingestion, executive summaries and the “reduced review time” success metric.
+
+The four challenges
+Challenge (impact)	Where the prototype answers it	Coverage
+Long, complex documents (slow extraction)	Role-specific summaries with page-level citations, plus Ask always available	✅
+Error-prone cross-referencing (compliance gaps, delays)	Discrepancies view, consistency agent, Doc Audit Log version checks, scorecard, Auditor GxP sign-off	✅ Strongest area
+No automated summarization (cost)	Summaries built once and cached; cost and tokens saved shown in Admin	✅
+Slow answers to ad hoc queries (slower decisions)	Ask panel on every screen, cited answers, role-based suggested questions	✅
+Constraints and expectations
+Requirement	Status
+HIPAA, no patient-identifiable data stored	✅ Patient-data guardrail, redaction counts, blocked-request demo
+Audit trail	✅ Hash-chained log, e-signature trail
+Role-based access	✅ Role detected at login, role-specific menus and views
+Pretrained LLM APIs only, no training	✅ Models listed in agent trace
+Accuracy of summaries	✅ Verified claims, grounding score, low-confidence answers withheld
+Upload or link documents (ingestion)	⚠️ Only a button; no ingestion flow is shown
+Executive summary	⚠️ Role-specific summaries exist, but no one-page executive summary
+Document repository integration	⚠️ No connection or sync status visible
+Reduced review time (success metric)	❌ Not shown anywhere
+Metadata on study phase and document type	⚠️ Document type is shown; phase is barely visible
+Recommended additions (all small)
+Ingestion screen. Upload a file or pick one from the document repository, then show a live progress strip: parse → patient-data redaction → section split → index → summary cached. This proves “document ingestion” from the brief.
+Executive summary card at the top of Documents & summaries. A one-page view of purpose, design, endpoints, key risks and open issues, each with citations, above the role-specific detail.
+Review-time metric. Add a headline tile such as “Avg review time: manual ~4 h → assisted ~30 min”, labelled as a target or measured during the demo. Plus a repository status chip such as “Document repository · connected · synced 10:30”.
+Should I add these three to the canvas and regenerate the HTML?
+
+Checking which caching layers each provider supports
+Use context caching at four levels. Together they make cost and latency fall as usage grows, and because every cache key includes the document version, nothing goes stale.
+
+The four cache levels
+Level	What’s cached	Key	What it saves
+1. Prompt-prefix cache (provider side)	The fixed start of each prompt: system prompt, role template, tool definitions and a “study context pack”	Identical prompt prefix	Cheaper, faster input tokens on every call
+2. Semantic answer cache	Final answers with their citations	role + study + document versions + question embedding (similarity ≥ 0.92)	The whole pipeline: no LLM call at all
+3. Summary and fact cache	Section summaries and extracted facts	doc_id + version + section hash + prompt version	Re-summarizing the same document for every role
+4. Embedding cache	Chunk vectors	SHA-256 of the chunk text	Re-embedding unchanged text when a document is re-ingested
+Plus conversation memory compression: keep the last 2 chat turns word for word and a ~150-token summary of older turns (written by nano), instead of resending the whole chat history.
+
+Level 1: structure prompts so the provider can cache them
+OpenAI-family models (including the Azure ones in your .env) cache long prompts (roughly 1,000+ tokens) automatically when the beginning is byte-identical, and repeated input is billed at a discount. Order every prompt like this:
+
+[STATIC, identical across users] system rules → role template → tool definitions
+                                 → study context pack (all section summaries, ~3K tokens)
+[DYNAMIC, changes per call]      retrieved chunks → chat summary → user question
+Never put timestamps, user names or trace IDs in the static part, or the cache misses.
+
+Your lab endpoint is a proxy in front of the models, so check it actually passes caching through. Run the same long prompt twice and read the usage on the second response:
+
+python
+r = client.chat.completions.create(model=M, messages=msgs)
+cached = r.usage.prompt_tokens_details.cached_tokens  # > 0 means the prefix cache hit
+trace.log(cached_tokens=cached)
+If it stays 0, levels 2–4 still deliver most of the savings.
+
+Level 2: version-aware answer cache
+python
+def cache_key(role, study, doc_versions):           # e.g. {"PROT":"v2.1","ICF":"v1.3"}
+    return f"{role}|{study}|" + "|".join(f"{k}:{v}" for k, v in sorted(doc_versions.items()))
+
+hit = ans_cache.query(query_embeddings=[qvec], n_results=1,
+                      where={"key": cache_key(role, study, vers)})
+if hit["distances"][0] and 1 - hit["distances"][0][0] >= 0.92:   # cosine similarity
+    return hit, "cache"   # answer, citations and original trace id
+When Protocol v2.2 is uploaded, the key changes and every old cached answer misses automatically. There’s no manual clearing step and no stale answers.
+
+Fit with GxP and Responsible AI
+A cached answer keeps its original citations, grounding score and trace ID. The audit entry reads “served from cache, source trace tr_8f21c.”
+Only de-identified text is ever cached, because guardrails run before anything is stored.
+Each cache entry records the prompt version, so changing a prompt also invalidates the cache.
+What to show in the demo
+In the Admin observability view, add a row for each of the four levels with its hit rate and tokens saved, plus “cached tokens” in each agent trace step. Then ask the same question twice live: the second answer comes back in about 50 ms with 0 tokens. That moment demonstrates token optimization clearly.
+
+Should I add the four cache levels to the Admin observability screen and regenerate the HTML?
+
+we will go with embedding cache later during implementation , please remember it
+
+Read and updated memory
+I’ve saved the decision: the embedding cache is deferred until implementation. I’ll remind you about it when we build the ingestion step.
+
+For now the design keeps the other levels: the prompt-prefix cache, the answer cache tied to document versions, the summary and fact cache, and compressed chat memory. When we get to it, the embedding cache is a small SQLite table that stores each chunk’s vector under a hash of its text, checked before calling the embedding API.
+
+
+
+
+
+Claude is AI and can make mistakes.
+Claude finished the response

@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TrialLens – Agentic Clinical Trial Assistant (prototype)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>button[style*="background: #1F6FB2"],button[style*="border: 1px solid #C5CED8"],button[style*="border: 1px solid #067647"],button[style*="border: 1px solid #1F6FB2"]{height:40px!important;min-height:40px!important;padding:0 16px!important;font-size:14px!important;font-weight:600!important;border-radius:8px!important;white-space:nowrap;min-width:150px;justify-content:center}
+button[aria-label="Send"]{min-width:46px;padding:0!important}
+body{margin:0;background:#EAF2FA}
+a{color:#1F6FB2}a:hover{color:#164F80}
+button[style*="background: #1F6FB2"],button[style*="border: 1px solid #C5CED8"],button[style*="border: 1px solid #067647"],button[style*="border: 1px solid #1F6FB2"]{height:40px!important;min-height:40px!important;padding:0 16px!important;font-size:14px!important;font-weight:600!important;border-radius:8px!important;white-space:nowrap;min-width:150px;justify-content:center}
+button[aria-label="Send"]{min-width:46px;padding:0!important}
+body{margin:0;background:#EAF2FA}
+a{color:#1F6FB2}a:hover{color:#164F80}
+.mono{font-family:'IBM Plex Mono',monospace}</style></head>
+<body><div id="root"></div>
+<template id="tpl-Main">
+<div style="min-height: 820px; display: flex; flex-wrap: wrap; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #0F1B2D; background: #EAF2FA">
+  <section style="flex: 1 1 520px; min-width: 0; background: #1E5A8E; color: #FFFFFF; padding: 56px 64px; box-sizing: border-box; display: flex; flex-direction: column; gap: 32px">
+    <div style="display: flex; align-items: center; gap: 12px">
+      <svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true"><rect x="2" y="2" width="32" height="32" rx="8" fill="none" stroke="#9CCBF2" stroke-width="2.5"/><path d="M10 18h5l3-7 4 14 3-7h3" fill="none" stroke="#9CCBF2" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span style="font-size: 22px; font-weight: 600; letter-spacing: -0.01em">TrialLens</span>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 16px; max-width: 520px">
+      <h1 style="margin: 0; font-size: 40px; line-height: 1.15; font-weight: 600; letter-spacing: -0.02em">Every answer cited.<br>Every inconsistency caught.</h1>
+      <p style="margin: 0; font-size: 17px; line-height: 1.55; color: #DCE8F4">An agentic assistant that summarizes clinical trial documents, answers questions with source citations and checks protocols, consent forms and submissions against each other.</p>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 14px; max-width: 520px">
+      <div style="display: flex; gap: 14px; align-items: flex-start">
+        <span style="flex: none; width: 32px; height: 32px; border-radius: 8px; background: #2C6AA0; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9CCBF2" stroke-width="2" aria-hidden="true"><path d="M4 4h12l4 4v12H4z"/><path d="M8 12h8M8 16h5"/></svg></span>
+        <div><div style="font-weight: 600; font-size: 15px">Summaries tailored to each role</div><div style="font-size: 14px; color: #D6E4F2; line-height: 1.5">Each claim links to a page and paragraph and is checked against its source by a separate verification step.</div></div>
+      </div>
+      <div style="display: flex; gap: 14px; align-items: flex-start">
+        <span style="flex: none; width: 32px; height: 32px; border-radius: 8px; background: #2C6AA0; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9CCBF2" stroke-width="2" aria-hidden="true"><path d="M7 7h10M7 12h10M7 17h6"/><circle cx="18" cy="17" r="3"/></svg></span>
+        <div><div style="font-weight: 600; font-size: 15px">Cross-document consistency agent</div><div style="font-size: 14px; color: #D6E4F2; line-height: 1.5">Compares Protocol, ICF and SAP on visits, eligibility, dosing and endpoints.</div></div>
+      </div>
+      <div style="display: flex; gap: 14px; align-items: flex-start">
+        <span style="flex: none; width: 32px; height: 32px; border-radius: 8px; background: #2C6AA0; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9CCBF2" stroke-width="2" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
+        <div><div style="font-weight: 600; font-size: 15px">Governed by design</div><div style="font-size: 14px; color: #D6E4F2; line-height: 1.5">PHI redaction before the LLM, role-based retrieval, hash-chained audit trail, full agent tracing.</div></div>
+      </div>
+    </div>
+    <div style="margin-top: auto; font-size: 13px; color: #C3D6EA">Prototype · synthetic, de-identified trial data only</div>
+  </section>
+
+  <section style="flex: 1 1 460px; min-width: 0; padding: 56px 64px; box-sizing: border-box; display: flex; align-items: center; justify-content: center">
+    <div style="width: 100%; max-width: 440px; background: #FFFFFF; border: 1px solid #DDE3EA; border-radius: 14px; padding: 32px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px">
+      <div>
+        <h2 style="margin: 0 0 6px; font-size: 22px; font-weight: 600">Sign in</h2>
+        <p style="margin: 0; font-size: 14px; color: #4A5768">Use your work email. Your role is detected from your account.</p>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="email" style="font-size: 13px; font-weight: 500">Work email</label>
+        <input id="email" type="email" autocomplete="username" value="{{email}}" onInput="{{setEmail}}" style="height: 44px; border: 1px solid #C5CED8; border-radius: 8px; padding: 0 12px; font: inherit; font-size: 15px; color: #0F1B2D">
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="pwd" style="font-size: 13px; font-weight: 500">Password</label>
+        <input id="pwd" type="password" autocomplete="current-password" value="demo1234" style="height: 44px; border: 1px solid #C5CED8; border-radius: 8px; padding: 0 12px; font: inherit; font-size: 15px; color: #0F1B2D">
+      </div>
+      <div role="status" style="{{roleBox}}">
+        <span style="font-size: 12px; color: #4A5768">Role</span>
+        <span style="font-size: 15px; font-weight: 600">{{roleName}}</span>
+        <span style="font-size: 13px; color: #4A5768">{{roleDesc}}</span>
+      </div>
+      <template data-if value="{{found}}" hint-placeholder-val="{{ true }}">
+        <a href="Workspace.dc.html" style="height: 40px; border-radius: 8px; background: #1F6FB2; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; text-decoration: none">Sign in</a>
+      </template>
+      <template data-if value="{{notFound}}" hint-placeholder-val="{{ false }}">
+        <span aria-disabled="true" style="height: 40px; border-radius: 8px; background: #B5C7DA; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px">Sign in</span>
+      </template>
+      <div style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #4A5768">
+        Demo accounts (password: any)
+        <div style="display: flex; flex-wrap: wrap; gap: 4px 10px">
+          <template data-for list="{{accounts}}" as="ac" hint-placeholder-count="5"><button type="button" onClick="{{ac.fill}}" style="font: inherit; font-size: 12px; background: none; border: 0; padding: 2px 0; color: #164F80; text-decoration: underline; cursor: pointer">{{ac.email}}</button></template>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+</template><template id="tpl-Workspace">
+<div style="min-height: 1000px; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #0F1B2D; background: #EAF2FA; display: flex; flex-wrap: wrap; gap: 16px; padding: 16px; box-sizing: border-box; align-items: flex-start">
+
+  <nav aria-label="Main menu" style="flex: 0 0 220px; background: #1E5A8E; color: #FFFFFF; border-radius: 16px; padding: 22px 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 6px; min-height: 940px">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 0 8px 20px; font-weight: 600; font-size: 20px">
+      <svg width="28" height="28" viewBox="0 0 36 36" aria-hidden="true"><rect x="2" y="2" width="32" height="32" rx="8" fill="none" stroke="#9CCBF2" stroke-width="3"/><path d="M10 18h5l3-7 4 14 3-7h3" fill="none" stroke="#9CCBF2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>TrialLens</div>
+    <div style="font-size: 11px; letter-spacing: 0.08em; color: #B8D3EC; padding: 0 8px 6px">MAIN MENU</div>
+    <template data-for list="{{nav}}" as="n" hint-placeholder-count="4"><button type="button" onClick="{{n.pick}}" style="{{n.style}}">{{n.label}}</button></template>
+    <div style="font-size: 11px; letter-spacing: 0.08em; color: #B8D3EC; padding: 18px 8px 6px">GENERAL</div>
+    <a href="Main.dc.html" style="color: #FFB4A8; font-size: 14px; padding: 10px 12px; text-decoration: none">Log out</a>
+    <div style="margin-top: auto; font-size: 12px; color: #B8D3EC; padding: 8px; line-height: 1.5">Synthetic, de-identified data · all actions audited</div>
+  </nav>
+
+  <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: #FFFFFF; border-radius: 14px; padding: 10px 16px">
+      <h1 style="margin: 0; font-size: 20px; font-weight: 600">{{viewTitle}}</h1>
+      <div style="margin-left: auto; display: flex; align-items: center; gap: 10px">
+        <span aria-hidden="true" style="width: 38px; height: 38px; border-radius: 50%; background: #1F6FB2; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600">{{initials}}</span>
+        <div><div style="font-size: 14px; font-weight: 600">{{userName}}</div><div style="font-size: 12px; color: #4A5768">{{roleFull}}</div></div>
+      </div>
+    </div>
+
+    <template data-if value="{{isDash}}" hint-placeholder-val="{{ true }}">
+      <div style="display: flex; flex-direction: column; gap: 16px">
+        <section style="background: #DCEBF8; border-radius: 14px; padding: 14px 18px; display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center">
+          <div style="flex: 1 1 260px; min-width: 0">
+            <h2 style="margin: 0 0 2px; font-size: 18px; font-weight: 600; color: #1E5A8E">Good morning, {{who}}</h2>
+            <p style="margin: 0; font-size: 13px; line-height: 1.45; color: #2A4A66">{{greet}}</p>
+          </div>
+          <div style="flex: 2 1 460px; min-width: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px">
+            <template data-for list="{{kpis}}" as="k" hint-placeholder-count="4">
+              <div title="{{k.note}}" style="background: #FFFFFF; border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: column; gap: 1px"><span style="font-size: 22px; font-weight: 600; color: #1E5A8E">{{k.value}}</span><span style="font-size: 12px; color: #33414F; line-height: 1.3">{{k.label}}</span></div>
+            </template>
+          </div>
+        </section>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: stretch">
+          <section aria-label="{{boxTitle}}" style="{{boxStyle}}">
+            <div style="display: flex; align-items: center; gap: 10px"><h2 style="margin: 0; font-size: 16px; font-weight: 600; color: {{boxInk}}">{{boxTitle}}</h2></div>
+            <template data-if value="{{isAud}}" hint-placeholder-val="{{ false }}"><div style="font-size: 12px; color: #33414F">AI output stays a draft until QA review and e-signature (21 CFR Part 11).</div></template>
+            <div role="tablist" style="display: flex; gap: 4px; border-bottom: 1px solid #E6D6B8">
+              <template data-for list="{{actTabs}}" as="tb" hint-placeholder-count="2"><button type="button" role="tab" aria-selected="{{tb.sel}}" onClick="{{tb.pick}}" style="{{tb.style}}">{{tb.label}}</button></template>
+            </div>
+            <template data-for list="{{acts}}" as="x" hint-placeholder-count="3">
+              <div style="display: flex; gap: 10px; align-items: center; background: #FFFFFF; border: 1px solid #EEE3D0; border-radius: 10px; padding: 8px 10px">
+                <span style="{{x.pStyle}}">{{x.p}}</span>
+                <div style="flex: 1; min-width: 0"><div style="font-size: 13px; font-weight: 500; line-height: 1.35">{{x.t}}</div><div style="font-size: 12px; color: #4A5768">{{x.due}}</div></div>
+                <button type="button" style="flex: none; min-height: 36px; padding: 0 12px; border-radius: 8px; border: 0; background: #1F6FB2; color: #FFFFFF; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer">{{x.btn}}</button>
+              </div>
+            </template>
+          </section>
+
+          <section style="flex: 1 1 380px; min-width: 0; background: #FFFFFF; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px">
+            <div style="display: flex; gap: 14px; align-items: center">
+              <div style="{{ring}}"><div style="width: 64px; height: 64px; border-radius: 50%; background: #FFFFFF; display: flex; flex-direction: column; align-items: center; justify-content: center"><span style="font-size: 22px; font-weight: 600; color: #1E5A8E">{{conf}}</span><span style="font-size: 10px; color: #4A5768">confidence</span></div></div>
+              <div><h2 style="margin: 0; font-size: 16px; font-weight: 600">Study intelligence scorecard</h2><div style="font-size: 12px; color: #4A5768">CT-204 · your lens · hover a row for the finding</div></div>
+            </div>
+            <template data-for list="{{score}}" as="s" hint-placeholder-count="5">
+              <div title="{{s.d}}" style="display: flex; gap: 10px; align-items: center">
+                <span style="flex: 0 0 170px; font-size: 13px; font-weight: 500">{{s.n}}</span>
+                <div style="flex: 1 1 80px; height: 8px; background: #EAF2FA; border-radius: 4px"><div style="{{s.bar}}"></div></div>
+                <span style="width: 36px; font-size: 13px; font-weight: 600; text-align: right">{{s.v}}</span>
+                <span style="{{s.tagStyle}}">{{s.tag}}</span>
+              </div>
+            </template>
+          </section>
+        </div>
+
+        <template data-if value="{{isGen}}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; flex-wrap: wrap; gap: 16px">
+          <section style="flex: 1 1 360px; min-width: 0; background: #FFFFFF; border-radius: 14px; padding: 18px; display: flex; gap: 20px; flex-wrap: wrap; align-items: center">
+            <h2 style="margin: 0; font-size: 16px; font-weight: 600; flex-basis: 100%">Documents indexed</h2>
+            <div style="width: 150px; height: 150px; border-radius: 50%; background: conic-gradient(#1F6FB2 0 33%, #6FA8DC 33% 66%, #F2A65A 66% 77%, #8C9EDB 77% 88%, #E58C8A 88% 100%); display: flex; align-items: center; justify-content: center">
+              <div style="width: 104px; height: 104px; border-radius: 50%; background: #FFFFFF; display: flex; flex-direction: column; align-items: center; justify-content: center"><span style="font-size: 12px; color: #4A5768">Total</span><span style="font-size: 28px; font-weight: 600">9</span></div>
+            </div>
+            <div style="flex: 1 1 160px; display: flex; flex-direction: column; gap: 6px; font-size: 13px">
+              <div style="display: flex; justify-content: space-between"><span><span style="color: #1F6FB2">●</span> Protocol &amp; amendments</span><b>3</b></div>
+              <div style="display: flex; justify-content: space-between"><span><span style="color: #6FA8DC">●</span> Consent forms</span><b>3</b></div>
+              <div style="display: flex; justify-content: space-between"><span><span style="color: #F2A65A">●</span> SAP</span><b>1</b></div>
+              <div style="display: flex; justify-content: space-between"><span><span style="color: #8C9EDB">●</span> Investigator's Brochure</span><b>1</b></div>
+              <div style="display: flex; justify-content: space-between"><span><span style="color: #E58C8A">●</span> Regulatory submission</span><b>1</b></div>
+            </div>
+          </section>
+          <section style="flex: 1 1 300px; min-width: 0; background: #FFFFFF; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+            <h2 style="margin: 0; font-size: 16px; font-weight: 600">Discrepancies · {{roleShort}}</h2>
+            <template data-for list="{{bars}}" as="b" hint-placeholder-count="3">
+              <div style="display: flex; flex-direction: column; gap: 4px"><div style="display: flex; justify-content: space-between; font-size: 13px"><span>{{b.label}}</span><b>{{b.n}}</b></div><div style="height: 10px; background: #EAF2FA; border-radius: 5px"><div style="{{b.bar}}"></div></div></div>
+            </template>
+            <h2 style="margin: 8px 0 0; font-size: 16px; font-weight: 600">Upcoming</h2>
+            <div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px">
+              <div style="display: flex; gap: 10px"><span class="mono" style="color: #1F6FB2; width: 48px">03 Dec</span>ICF v1.4 approval due</div>
+              <div style="display: flex; gap: 10px"><span class="mono" style="color: #1F6FB2; width: 48px">05 Dec</span>Site 012 re-consent deadline</div>
+              <div style="display: flex; gap: 10px"><span class="mono" style="color: #1F6FB2; width: 48px">15 Dec</span>Data cut for safety review</div>
+            </div>
+          </section>
+        </div>
+        </template>
+
+        <template data-if value="{{isCom}}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; flex-wrap: wrap; gap: 16px">
+            <section style="flex: 2 1 420px; min-width: 0; background: #FFFFFF; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 14px">
+              <h2 style="margin: 0; font-size: 16px; font-weight: 600">Site status &amp; enrollment</h2>
+              <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-around">
+                <template data-for list="{{rings}}" as="r" hint-placeholder-count="3">
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 6px"><div style="{{r.ring}}"><div style="width: 66px; height: 66px; border-radius: 50%; background: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 600">{{r.v}}</div></div><div style="font-size: 13px; font-weight: 500">{{r.l}}</div><div style="font-size: 12px; color: #4A5768">{{r.d}}</div></div>
+                </template>
+              </div>
+            </section>
+            <section style="flex: 1 1 280px; min-width: 0; background: #FFFFFF; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+              <h2 style="margin: 0; font-size: 16px; font-weight: 600">Monitoring compliance</h2>
+              <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap">
+                <div><div style="font-size: 13px; color: #4A5768">Visits overdue</div><div style="font-size: 40px; font-weight: 600"><span style="color: #B42318">2</span><span style="color: #8A97A6"> / 6</span></div></div>
+                <div><div style="font-size: 13px; color: #4A5768">Visit reports on time</div><div style="font-size: 40px; font-weight: 600; color: #1E5A8E">64%</div><div style="font-size: 12px; color: #4A5768">target 80%</div></div>
+              </div>
+              <div style="font-size: 12px; color: #4A5768">Overdue: Site 012 interim visit, Site 027 close-out</div>
+            </section>
+          </div>
+        </template>
+
+        <template data-if value="{{isCra}}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; flex-wrap: wrap; gap: 16px">
+            <section style="flex: 1 1 300px; min-width: 0; background: #FFFFFF; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+              <h2 style="margin: 0; font-size: 16px; font-weight: 600">Open queries by type</h2>
+              <div style="display: flex; gap: 14px; align-items: flex-end; height: 100px; border-bottom: 1px solid #D6E4F0">
+                <template data-for list="{{qtypes}}" as="p" hint-placeholder-count="5"><div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%"><span style="font-size: 13px; font-weight: 600">{{p.n}}</span><div style="{{p.bar}}"></div></div></template>
+              </div>
+              <div style="display: flex; gap: 14px"><template data-for list="{{qtypes}}" as="p" hint-placeholder-count="5"><span style="flex: 1; text-align: center; font-size: 12px; color: #4A5768">{{p.l}}</span></template></div>
+            </section>
+            <template data-for list="{{craRings}}" as="r" hint-placeholder-count="2">
+              <section style="flex: 1 1 200px; min-width: 0; background: #FFFFFF; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; align-items: center; gap: 8px">
+                <h2 style="margin: 0; font-size: 16px; font-weight: 600; align-self: flex-start">{{r.l}}</h2>
+                <div style="{{r.ring}}"><div style="width: 66px; height: 66px; border-radius: 50%; background: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 600">{{r.v}}</div></div>
+                <div style="font-size: 12px; color: #4A5768">{{r.d}}</div>
+              </section>
+            </template>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 16px">
+            <section style="flex: 1 1 340px; min-width: 0; background: #FFFFFF; border-radius: 14px; padding: 18px">
+              <h2 style="margin: 0 0 8px; font-size: 16px; font-weight: 600">ICF versions pending review</h2>
+              <template data-for list="{{icf}}" as="t" hint-placeholder-count="3"><div style="display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid #EAF2FA; padding: 8px 0; font-size: 14px"><span>{{t.a}}</span><span style="color: #4A5768">{{t.b}}</span></div></template>
+            </section>
+            <section style="flex: 1 1 340px; min-width: 0; background: #FFFFFF; border-radius: 14px; padding: 18px">
+              <h2 style="margin: 0 0 8px; font-size: 16px; font-weight: 600">Queries waiting for my review</h2>
+              <template data-for list="{{qwait}}" as="t" hint-placeholder-count="3"><div style="display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid #EAF2FA; padding: 8px 0; font-size: 14px"><span>{{t.a}}</span><span style="color: #4A5768">{{t.b}}</span></div></template>
+            </section>
+          </div>
+        </template>
+
+        <template data-if value="{{isAud}}" hint-placeholder-val="{{ false }}">
+          <section style="background: #FFFFFF; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+            <h2 style="margin: 0; font-size: 16px; font-weight: 600">AI output lifecycle</h2>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 14px">
+              <span style="border: 1px solid #C5CED8; border-radius: 8px; padding: 8px 14px"><b>12</b> AI draft</span><span aria-hidden="true">→</span>
+              <span style="border: 1px solid #F2C27A; background: #FFF8EC; border-radius: 8px; padding: 8px 14px"><b>7</b> Under human review</span><span aria-hidden="true">→</span>
+              <span style="border: 1px solid #B7E0C6; background: #E6F4EC; border-radius: 8px; padding: 8px 14px"><b>24</b> Approved</span><span aria-hidden="true">→</span>
+              <span style="border: 1px solid #1F6FB2; background: #DCEBF8; border-radius: 8px; padding: 8px 14px"><b>21</b> E-signed record</span>
+              <span style="margin-left: auto; font-size: 12px; color: #4A5768">2 rejected and regenerated this week</span>
+            </div>
+          </section>
+          <div style="display: flex; flex-wrap: wrap; gap: 16px">
+            <section style="flex: 1 1 380px; min-width: 0; background: #FFFFFF; border-radius: 14px; padding: 18px; overflow-x: auto">
+              <h2 style="margin: 0 0 8px; font-size: 16px; font-weight: 600">Document version control</h2>
+              <table style="width: 100%; border-collapse: collapse; font-size: 13px; min-width: 380px">
+                <thead><tr style="text-align: left; color: #4A5768; font-size: 12px"><th style="padding: 6px">Document</th><th style="padding: 6px">Version</th><th style="padding: 6px">Effective</th><th style="padding: 6px">Status</th></tr></thead>
+                <tbody><template data-for list="{{vctl}}" as="v" hint-placeholder-count="5"><tr style="border-top: 1px solid #EAF2FA"><td style="padding: 6px">{{v.n}}</td><td class="mono" style="padding: 6px">{{v.v}}</td><td style="padding: 6px">{{v.d}}</td><td style="padding: 6px"><span style="{{v.s}}">{{v.st}}</span></td></tr></template></tbody>
+              </table>
+            </section>
+            <section style="flex: 1 1 380px; min-width: 0; background: #FFFFFF; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+              <h2 style="margin: 0; font-size: 16px; font-weight: 600">Traceability · finding DSC-014</h2>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px">
+                <span style="background: #E8EEF7; border-radius: 8px; padding: 8px 10px">IB v4 §5 p.41</span><span aria-hidden="true">→</span>
+                <span style="background: #E8EEF7; border-radius: 8px; padding: 8px 10px">Consistency agent · tr_8f1d0</span><span aria-hidden="true">→</span>
+                <span style="background: #FFF8EC; border-radius: 8px; padding: 8px 10px">Reviewer: sent to safety</span><span aria-hidden="true">→</span>
+                <span style="background: #E6F4EC; border-radius: 8px; padding: 8px 10px">Audit entry <span class="mono">44b0…19</span></span>
+              </div>
+              <div style="font-size: 12px; color: #4A5768">Every finding links back to its source page, the agent run that produced it, the human decision and a hash-chained audit entry.</div>
+              <h2 style="margin: 8px 0 0; font-size: 16px; font-weight: 600">Superseded but still referenced</h2>
+              <div style="display: flex; justify-content: space-between; gap: 10px; font-size: 13px; border-top: 1px solid #EAF2FA; padding-top: 8px"><span>Protocol v2.0 ← cited by ICF v1.3</span><span style="color: #912018; font-weight: 600">Overdue</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 10px; font-size: 13px; border-top: 1px solid #EAF2FA; padding-top: 8px"><span>IB v3 ← cited by site training deck</span><span style="color: #7A4504; font-weight: 600">Review</span></div>
+            </section>
+          </div>
+        </template>
+      </div>
+    </template>
+
+    <template data-if value="{{isDocs}}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+        <div style="flex: 1 1 220px; max-width: 260px; display: flex; flex-direction: column; gap: 8px">
+          <template data-for list="{{docs}}" as="d" hint-placeholder-count="5"><div style="background: #FFFFFF; border-radius: 10px; padding: 10px 12px"><div style="font-size: 14px; font-weight: 600">{{d.n}}</div><div style="font-size: 12px; color: #4A5768">{{d.m}}</div></div></template>
+          <button type="button" style="height: 44px; border-radius: 8px; border: 0; background: #1F6FB2; color: #FFFFFF; font: inherit; font-weight: 600; cursor: pointer">Upload or sync repository</button>
+        </div>
+        <section style="flex: 999 1 380px; min-width: 0; background: #FFFFFF; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px"><h2 style="margin: 0; font-size: 18px; font-weight: 600">{{lens}}</h2><span style="font-size: 12px; background: #E6F4EC; color: #05603A; border-radius: 999px; padding: 3px 10px; font-weight: 500">Verified 5/5 claims · from cache</span></div>
+          <div style="font-size: 13px; background: #FDF3E1; color: #6B3D04; border-radius: 8px; padding: 8px 12px">AI-generated. Check the cited source before acting.</div>
+          <template data-for list="{{points}}" as="p" hint-placeholder-count="5">
+            <div style="border-top: 1px solid #EAF2FA; padding-top: 10px; display: flex; flex-direction: column; gap: 4px"><div style="font-size: 15px; line-height: 1.5">{{p.t}}</div><span class="mono" style="font-size: 12px; color: #164F80">{{p.c}}</span></div>
+          </template>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; padding-top: 6px"><button type="button" style="height: 44px; padding: 0 16px; border-radius: 8px; border: 0; background: #1F6FB2; color: #FFFFFF; font: inherit; font-weight: 600; cursor: pointer">Approve summary</button><button type="button" style="height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid #C5CED8; background: #FFFFFF; font: inherit; cursor: pointer; color: #0F1B2D">Flag an error</button></div>
+        </section>
+      </div>
+    </template>
+
+    <template data-if value="{{isDisc}}" hint-placeholder-val="{{ false }}">
+      <section style="background: #FFFFFF; border-radius: 14px; padding: 20px; overflow-x: auto">
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px; min-width: 680px">
+          <thead><tr style="text-align: left; color: #4A5768; font-size: 12px; text-transform: uppercase"><th style="padding: 8px">Item</th><th style="padding: 8px">Source A</th><th style="padding: 8px">Source B</th><th style="padding: 8px">Severity</th><th style="padding: 8px">Action</th></tr></thead>
+          <tbody><template data-for list="{{disc}}" as="d" hint-placeholder-count="3"><tr style="border-top: 1px solid #EAF2FA; vertical-align: top"><td style="padding: 10px 8px; font-weight: 600">{{d.i}}</td><td style="padding: 10px 8px">{{d.a}}</td><td style="padding: 10px 8px">{{d.b}}</td><td style="padding: 10px 8px"><span style="{{d.s}}">{{d.sev}}</span></td><td style="padding: 10px 8px"><button type="button" style="font: inherit; font-size: 13px; border: 0; background: #1F6FB2; color: #FFFFFF; border-radius: 6px; padding: 6px 10px; cursor: pointer">{{d.act}}</button></td></tr></template></tbody>
+        </table>
+        <p style="margin: 10px 0 0; font-size: 12px; color: #4A5768">Dismissing needs a reason, written to the audit trail. Agents never close a discrepancy themselves.</p>
+      </section>
+    </template>
+
+    <template data-if value="{{isVer}}" hint-placeholder-val="{{ false }}">
+      <div style="background: #FFFFFF; border-radius: 14px; display: flex; flex-wrap: wrap; min-height: 560px; overflow: hidden">
+        <div style="flex: 1 1 180px; max-width: 210px; border-right: 1px solid #E3EAEE; padding: 12px; display: flex; flex-direction: column; gap: 4px; font-size: 14px">
+          <div style="font-size: 11px; letter-spacing: 0.06em; color: #4A5768; padding: 4px 8px">TRIAL MASTER FILE</div>
+          <div style="padding: 8px; border-radius: 8px">01 Trial management</div>
+          <div style="padding: 8px; border-radius: 8px; background: #EAF2FA; font-weight: 600">02 Central trial documents</div>
+          <div style="padding: 8px; border-radius: 8px">03 Regulatory</div>
+          <div style="padding: 8px; border-radius: 8px">04 IRB / IEC</div>
+          <div style="padding: 8px; border-radius: 8px">05 Site management</div>
+        </div>
+        <div style="flex: 1 1 220px; max-width: 260px; border-right: 1px solid #E3EAEE; padding: 12px; display: flex; flex-direction: column; gap: 4px">
+          <template data-for list="{{vdocs}}" as="d" hint-placeholder-count="5"><button type="button" onClick="{{d.pick}}" style="{{d.style}}"><span style="font-size: 14px; font-weight: 600">{{d.n}}</span><span style="font-size: 12px; color: #4A5768">{{d.ver}}</span><span style="{{d.stStyle}}">{{d.st}}</span></button></template>
+        </div>
+        <div style="flex: 999 1 320px; min-width: 0; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+          <div><h2 style="margin: 0 0 4px; font-size: 20px; font-weight: 600">{{vName}}</h2><span style="{{vStStyle}}">{{vStatus}}</span></div>
+          <template data-if value="{{vMissing}}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; gap: 16px; align-items: center; border: 1px dashed #E58C8A; border-radius: 12px; padding: 16px; background: #FFF7F6">
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; width: 84px; font-size: 12px; color: #4A5768"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#912018" stroke-width="2" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg>No version</div>
+              <div style="flex: 1"><div style="font-weight: 600">Expected document missing</div><div style="font-size: 13px; color: #4A5768">{{vRef}}</div></div>
+              <button type="button" style="min-height: 44px; padding: 0 14px; border-radius: 8px; border: 0; background: #1F6FB2; color: #FFFFFF; font: inherit; font-weight: 600; cursor: pointer">Request from owner</button>
+            </div>
+          </template>
+          <template data-if value="{{vHas}}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; flex-direction: column; gap: 10px">
+              <h3 style="margin: 0; font-size: 14px; font-weight: 600; color: #33414F">Versions</h3>
+              <template data-for list="{{vVers}}" as="v" hint-placeholder-count="3"><div style="display: flex; gap: 14px; align-items: center; border: 1px solid #E3EAEE; border-radius: 10px; padding: 10px 12px; font-size: 14px"><span class="mono" style="font-weight: 600; width: 56px">{{v.v}}</span><span style="color: #4A5768; width: 100px">{{v.dt}}</span><span>{{v.s}}</span></div></template>
+              <h3 style="margin: 6px 0 0; font-size: 14px; font-weight: 600; color: #33414F">Version compatibility check</h3>
+              <div style="font-size: 14px; line-height: 1.5; background: #F2F7FD; border-radius: 10px; padding: 10px 12px">{{vRef}}</div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </template>
+
+    <template data-if value="{{isAdmin}}" hint-placeholder-val="{{ false }}">
+      <template data-import name="Admin" hint-size="100%,1100px"></template>
+    </template>
+  </main>
+
+  <aside aria-label="Ask TrialLens" style="flex: 1 1 300px; max-width: 360px; min-width: 0; background: #FFFFFF; border-radius: 16px; padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; min-height: 940px">
+    <div><h2 style="margin: 0; font-size: 17px; font-weight: 600">Ask TrialLens</h2><div style="font-size: 12px; color: #4A5768">CT-204 · 9 documents · answers cite sources</div></div>
+    <div style="align-self: flex-end; max-width: 85%; background: #1E5A8E; color: #FFFFFF; border-radius: 12px 12px 2px 12px; padding: 9px 12px; font-size: 14px">{{q}}</div>
+    <div style="background: #F2F7FD; border-radius: 12px 12px 12px 2px; padding: 10px 12px; font-size: 14px; line-height: 1.5; display: flex; flex-direction: column; gap: 6px">{{a}}<span class="mono" style="font-size: 11px; color: #164F80">{{ac}}</span><span style="font-size: 11px; color: #4A5768">Grounded 0.94 · AI-generated</span></div>
+    <div style="align-self: flex-end; max-width: 85%; background: #1E5A8E; color: #FFFFFF; border-radius: 12px 12px 2px 12px; padding: 9px 12px; font-size: 14px">Give me names of subjects at site 012.</div>
+    <div style="background: #FDECEA; color: #7A1A12; border-radius: 12px 12px 12px 2px; padding: 10px 12px; font-size: 14px; line-height: 1.5"><b>Blocked by guardrail (PHI).</b> Only de-identified data is available. Try site-level counts. Logged as GR-0193.</div>
+    <div style="margin-top: auto; display: flex; flex-direction: column; gap: 6px">
+      <template data-for list="{{suggest}}" as="s" hint-placeholder-count="3"><button type="button" style="font: inherit; font-size: 13px; text-align: left; border: 1px solid #D3DDE3; background: #FFFFFF; border-radius: 10px; padding: 8px 10px; cursor: pointer; color: #0F1B2D">{{s}}</button></template>
+    </div>
+    <div style="display: flex; gap: 6px">
+      <input aria-label="Ask a question" placeholder="Ask about the documents…" style="flex: 1; min-width: 0; height: 46px; border: 1px solid #C5CED8; border-radius: 10px; padding: 0 12px; font: inherit; font-size: 14px">
+      <button type="button" aria-label="Send" style="width: 46px; height: 46px; border-radius: 10px; border: 0; background: #1F6FB2; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" aria-hidden="true"><path d="M4 12l16-8-6 16-2-7z"/></svg></button>
+    </div>
+  </aside>
+</div>
+</template><template id="tpl-Admin">
+<div style="min-height: 1100px; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #0F1B2D; background: #EAF2FA; display: flex; flex-direction: column">
+  <div style="padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; max-width: 1400px; width: 100%; box-sizing: border-box">
+    <div role="tablist" style="display: flex; gap: 4px; border-bottom: 1px solid #DDE3EA; flex-wrap: wrap">
+      <template data-for list="{{tabs}}" as="t" hint-placeholder-count="3"><button type="button" role="tab" onClick="{{t.pick}}" style="{{t.style}}">{{t.label}}</button></template>
+    </div>
+
+    <template data-if value="{{isObs}}" hint-placeholder-val="{{ true }}">
+      <div style="display: flex; flex-direction: column; gap: 16px">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px">
+          <template data-for list="{{kpis}}" as="k" hint-placeholder-count="6">
+            <div style="background: #FFFFFF; border: 1px solid #DDE3EA; border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px">
+              <div style="font-size: 13px; color: #4A5768">{{k.label}}</div>
+              <div style="font-size: 26px; font-weight: 600; letter-spacing: -0.01em">{{k.value}}</div>
+              <div style="{{k.noteStyle}}">{{k.note}}</div>
+            </div>
+          </template>
+        </div>
+
+        <section style="background: #FFFFFF; border: 1px solid #DDE3EA; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px"><h2 style="margin: 0; font-size: 17px; font-weight: 600">Agent pipeline · average per request</h2><span style="font-size: 13px; color: #4A5768">Model cascade: nano routes, mini answers, 4.1 judges</span></div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch">
+            <template data-for list="{{pipe}}" as="p" hint-placeholder-count="7">
+              <div style="flex: 1 1 140px; min-width: 0; border: 1px solid #DDE3EA; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; background: #FAFBFC">
+                <div style="font-size: 14px; font-weight: 600">{{p.name}}</div>
+                <div class="mono" style="font-size: 11px; color: #4A5768">{{p.model}}</div>
+                <div style="font-size: 12px; color: #33414F">{{p.ms}} · {{p.tok}}</div>
+              </div>
+            </template>
+          </div>
+        </section>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 16px">
+          <section style="flex: 1 1 380px; min-width: 0; background: #FFFFFF; border: 1px solid #DDE3EA; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+            <h2 style="margin: 0; font-size: 17px; font-weight: 600">Tokens by model</h2>
+            <template data-for list="{{models}}" as="m" hint-placeholder-count="4">
+              <div style="display: flex; flex-direction: column; gap: 4px">
+                <div style="display: flex; justify-content: space-between; font-size: 13px"><span class="mono">{{m.name}}</span><span style="color: #4A5768">{{m.tok}} · {{m.cost}}</span></div>
+                <div style="height: 10px; background: #EEF1F5; border-radius: 5px"><div style="{{m.bar}}"></div></div>
+              </div>
+            </template>
+          </section>
+          <section style="flex: 1 1 380px; min-width: 0; background: #FFFFFF; border: 1px solid #DDE3EA; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+            <h2 style="margin: 0; font-size: 17px; font-weight: 600">Where tokens were saved</h2>
+            <template data-for list="{{savings}}" as="s" hint-placeholder-count="5">
+              <div style="display: flex; justify-content: space-between; gap: 12px; font-size: 14px; border-top: 1px solid #EEF1F5; padding-top: 8px"><span>{{s.what}}</span><span style="font-weight: 600; color: #05603A; white-space: nowrap">{{s.saved}}</span></div>
+            </template>
+          </section>
+        </div>
+
+        <section style="background: #FFFFFF; border: 1px solid #DDE3EA; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+          <h2 style="margin: 0; font-size: 17px; font-weight: 600">Recent traces</h2>
+          <div style="overflow-x: auto">
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px; min-width: 820px">
+              <thead><tr style="text-align: left; color: #4A5768; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em"><th style="padding: 8px">Trace</th><th style="padding: 8px">Role</th><th style="padding: 8px">Intent</th><th style="padding: 8px">Tokens</th><th style="padding: 8px">Latency</th><th style="padding: 8px">Grounded</th><th style="padding: 8px">Outcome</th></tr></thead>
+              <tbody><template data-for list="{{traces}}" as="r" hint-placeholder-count="5">
+                <tr style="border-top: 1px solid #EEF1F5"><td class="mono" style="padding: 8px">{{r.id}}</td><td style="padding: 8px">{{r.role}}</td><td style="padding: 8px">{{r.intent}}</td><td style="padding: 8px">{{r.tok}}</td><td style="padding: 8px">{{r.lat}}</td><td style="padding: 8px">{{r.g}}</td><td style="padding: 8px"><span style="{{r.st}}">{{r.out}}</span></td></tr>
+              </template></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </template>
+
+    <template data-if value="{{isAudit}}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 14px">
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: #E6F4EC; border: 1px solid #B7E0C6; border-radius: 12px; padding: 14px 16px">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#067647" stroke-width="2" aria-hidden="true"><path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"/></svg>
+          <div style="flex: 1; min-width: 240px"><div style="font-weight: 600; color: #05603A">Hash chain verified · 1,248 entries intact</div><div style="font-size: 13px; color: #1F5136">Each entry stores SHA-256(previous hash + entry). Any edit breaks the chain from that point on.</div></div>
+          <button type="button" style="height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid #067647; background: #FFFFFF; color: #05603A; font: inherit; font-weight: 600; cursor: pointer">Re-verify chain</button>
+          <button type="button" style="height: 44px; padding: 0 16px; border-radius: 8px; border: 0; background: #1F6FB2; color: #FFFFFF; font: inherit; font-weight: 600; cursor: pointer">Export CSV</button>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px">
+          <label style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #4A5768">User<select style="height: 40px; border: 1px solid #C5CED8; border-radius: 8px; font: inherit; font-size: 14px; padding: 0 8px"><option>All users</option></select></label>
+          <label style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #4A5768">Role<select style="height: 40px; border: 1px solid #C5CED8; border-radius: 8px; font: inherit; font-size: 14px; padding: 0 8px"><option>All roles</option><option>Clinical Ops Manager</option><option>CRA</option><option>Medical Reviewer</option></select></label>
+          <label style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #4A5768">Action<select style="height: 40px; border: 1px solid #C5CED8; border-radius: 8px; font: inherit; font-size: 14px; padding: 0 8px"><option>All actions</option><option>QUERY</option><option>SUMMARY_APPROVE</option><option>GUARDRAIL_BLOCK</option><option>DISCREPANCY_DISMISS</option></select></label>
+        </div>
+        <section style="background: #FFFFFF; border: 1px solid #DDE3EA; border-radius: 12px; padding: 8px 12px; overflow-x: auto">
+          <table style="width: 100%; border-collapse: collapse; font-size: 13px; min-width: 980px">
+            <thead><tr style="text-align: left; color: #4A5768; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em"><th style="padding: 8px">Time (IST)</th><th style="padding: 8px">User · role</th><th style="padding: 8px">Action</th><th style="padding: 8px">Object</th><th style="padding: 8px">Detail</th><th style="padding: 8px">Prev hash</th><th style="padding: 8px">Hash</th></tr></thead>
+            <tbody><template data-for list="{{audit}}" as="a" hint-placeholder-count="7">
+              <tr style="border-top: 1px solid #EEF1F5; vertical-align: top"><td class="mono" style="padding: 8px; white-space: nowrap">{{a.t}}</td><td style="padding: 8px">{{a.u}}</td><td style="padding: 8px"><span style="{{a.st}}">{{a.act}}</span></td><td style="padding: 8px">{{a.obj}}</td><td style="padding: 8px; color: #33414F">{{a.d}}</td><td class="mono" style="padding: 8px; color: #4A5768">{{a.p}}</td><td class="mono" style="padding: 8px">{{a.h}}</td></tr>
+            </template></tbody>
+          </table>
+        </section>
+      </div>
+    </template>
+
+    <template data-if value="{{isGuard}}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+        <section style="flex: 1 1 520px; min-width: 0; background: #FFFFFF; border: 1px solid #DDE3EA; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 4px">
+          <h2 style="margin: 0 0 8px; font-size: 17px; font-weight: 600">Guardrails</h2>
+          <template data-for list="{{guards}}" as="g" hint-placeholder-count="8">
+            <div style="display: flex; gap: 14px; align-items: center; border-top: 1px solid #EEF1F5; padding: 10px 0">
+              <div style="flex: 1; min-width: 0"><div style="font-size: 14px; font-weight: 600">{{g.name}} <span style="font-size: 11px; font-weight: 500; color: #4A5768; background: #EEF1F5; border-radius: 4px; padding: 1px 6px; margin-left: 4px">{{g.stage}}</span></div><div style="font-size: 13px; color: #4A5768; line-height: 1.45">{{g.desc}}</div></div>
+              <span style="font-size: 12px; color: #4A5768; white-space: nowrap">{{g.hits}}</span>
+              <button type="button" role="switch" aria-checked="{{g.on}}" aria-label="{{g.name}}" onClick="{{g.toggle}}" style="{{g.track}}"><span style="{{g.knob}}"></span></button>
+            </div>
+          </template>
+        </section>
+        <section style="flex: 1 1 380px; min-width: 0; background: #FFFFFF; border: 1px solid #DDE3EA; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+          <h2 style="margin: 0; font-size: 17px; font-weight: 600">Responsible AI scorecard</h2>
+          <template data-for list="{{rai}}" as="r" hint-placeholder-count="6">
+            <div style="border-top: 1px solid #EEF1F5; padding-top: 10px; display: flex; flex-direction: column; gap: 3px">
+              <div style="display: flex; justify-content: space-between; gap: 8px"><span style="font-size: 14px; font-weight: 600">{{r.p}}</span><span style="font-size: 13px; font-weight: 600; color: #05603A">{{r.m}}</span></div>
+              <div style="font-size: 13px; color: #4A5768; line-height: 1.45">{{r.how}}</div>
+            </div>
+          </template>
+        </section>
+      </div>
+    </template>
+    <template data-if value="{{isTrace}}" hint-placeholder-val="{{ false }}">
+      <section style="background: #FFFFFF; border: 1px solid #DDE3EA; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 4px">
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; margin-bottom: 8px"><h2 style="margin: 0; font-size: 17px; font-weight: 600">Trace <span class="mono">tr_8f21c</span></h2><span style="font-size: 13px; color: #4A5768">p.rao · CRA · "What must sites do after Amendment 2?" · 1,412 tokens · 2.4 s · $0.0009</span></div>
+        <template data-for list="{{spans}}" as="s" hint-placeholder-count="7">
+          <div style="display: flex; gap: 12px; border-top: 1px solid #EEF1F5; padding: 10px 0; flex-wrap: wrap">
+            <span style="{{s.dot}}" aria-hidden="true"></span>
+            <div style="flex: 1 1 260px; min-width: 0"><div style="font-size: 14px; font-weight: 600">{{s.n}} <span class="mono" style="font-size: 11px; font-weight: 400; color: #4A5768">{{s.m}}</span></div><div style="font-size: 13px; color: #33414F">{{s.d}}</div></div>
+            <span style="font-size: 13px; color: #4A5768; width: 130px">{{s.t}} tok</span><span class="mono" style="font-size: 13px; width: 70px; text-align: right">{{s.ms}}</span>
+          </div>
+        </template>
+      </section>
+    </template>
+  </div>
+</div>
+</template>
+<script>
+class DCLogic{constructor(p){this.props=p||{};this.state={}}setState(s){Object.assign(this.state,typeof s==='function'?s(this.state):s);App.render()}forceUpdate(){App.render()}}
+
+class C_Main extends DCLogic {
+  constructor(p){ super(p); this.state = { email: 'priya.sharma@pharma-demo.com', picked: 'com' }; }
+  renderVals() {
+    const U = {
+      'priya.sharma@pharma-demo.com': ['com', 'Clinical Operations Manager', 'Monitor study execution and protocol requirements'],
+      'rahul.das@pharma-demo.com': ['cra', 'Clinical Research Associate', 'Review study documents and site-level discrepancies'],
+      'anita.rao@pharma-demo.com': ['mr', 'Medical Reviewer', 'Review endpoints, clinical and safety content'],
+      'meera.iyer@pharma-demo.com': ['aud', 'QA Auditor', 'GxP sign-off of AI outputs, traceability, version control'],
+      'admin@pharma-demo.com': ['adm', 'AI Platform Admin', 'Audit trail, observability and guardrails']
+    };
+    const key = (this.state.email || '').trim().toLowerCase();
+    const u = U[key];
+    const set = v => { const k = v.trim().toLowerCase(); this.setState({ email: v, picked: U[k] ? U[k][0] : null }); };
+    const typed = key.length > 0;
+    return {
+      email: this.state.email, setEmail: e => set(e.target.value),
+      found: !!u, notFound: !u,
+      roleName: u ? u[1] : (typed ? 'No role found' : 'Enter your email'),
+      roleDesc: u ? u[2] : (typed ? 'This email has no TrialLens role. Contact your administrator.' : 'Your role appears here automatically.'),
+      roleBox: 'display:flex;flex-direction:column;gap:2px;border-radius:10px;padding:12px 14px;' + (u ? 'background:#E3EEF9;border:1px solid #BCD4EE' : 'background:#F4F6F8;border:1px dashed #C5CED8'),
+      accounts: Object.keys(U).map(em => ({ email: em, fill: () => set(em) }))
+    };
+  }
+}
+
+class C_Workspace extends DCLogic {
+  constructor(p){ super(p); this.state = { role: 'com', view: 'dash' }; }
+  renderVals() {
+    const R = {
+      com: { label: 'Clin Ops', who: 'Priya', short: 'study execution',
+        greet: 'Two protocol amendments need follow-up and the ICF update is due this week. Ask anything about CT-204 on the right.',
+        kpis: [['Active studies', '3', 'Phase II and III'], ['Amendments to action', '2', 'AMD-2 site rollout'], ['Open discrepancies', '5', '2 high severity'], ['Docs awaiting review', '4', 'Summaries ready']],
+        lens: 'Operations lens · Protocol v2.1',
+        pts: [['24-week treatment, 8 on-site visits plus 2 phone follow-ups.', 'PROT §6.1 p.31'], ['Target 420 subjects across 38 sites, randomized 1:1.', 'PROT §9.2 p.58'], ['Amendment 2 adds an ECG at Week 4.', 'PROT §6.3 p.33'], ['Screening window 28 days; one re-screen allowed.', 'PROT §5.4 p.27'], ['Central lab samples ship within 24 h.', 'PROT §7.5 p.44']],
+        q: 'Which visits changed in Amendment 2?', a: 'A 12-lead ECG is added at Week 4 and the PK sample moves from Week 8 to Week 6.', ac: 'PROT §6.3 p.33 · AMD-2 p.4',
+        sug: ['Summarize screening procedures', 'List protocol deviation categories', 'What changed between v2.0 and v2.1?'],
+        disc: [['Visit count', '8 visits (PROT §6.1)', '6 visits (ICF §4)', 'High', 'Raise ICF update'], ['Screening window', '28 days (PROT §5.4)', '21 days (ICF §3)', 'Medium', 'Raise ICF update']], bars: [5, 3, 9] },
+      cra: { label: 'CRA', who: 'Rahul', short: 'your sites',
+        greet: 'Site 012 still uses ICF v1.3 and needs re-consent. Three new discrepancies were found at your sites.',
+        kpis: [['Sites assigned', '6', '2 need action'], ['Open site queries', '7', '3 raised today'], ['Re-consent pending', '2', 'Sites 012, 019'], ['Docs to review', '3', 'ICF, AMD-2, log']],
+        lens: 'Site review lens · ICF v1.3 vs Protocol',
+        pts: [['ICF lists 6 visits; the protocol requires 8.', 'ICF §4 p.3'], ['Consent before any screening procedure, including fasting labs.', 'PROT §5.1 p.25'], ['Re-consent all active subjects after Amendment 2.', 'AMD-2 p.6'], ['Primary endpoint data in eCRF within 5 days.', 'PROT §11.2 p.71'], ['Exclusion 7 (eGFR under 45) missing from pre-screen log.', 'PROT §5.3 p.26']],
+        q: 'What must sites do after Amendment 2?', a: 'Re-consent active subjects on ICF v1.4, add the Week 4 ECG to worksheets and retrain staff within 30 days.', ac: 'AMD-2 p.6 · PROT §6.3 p.33',
+        sug: ['Which criteria can be checked at pre-screen?', 'List re-consent requirements', 'Open queries for site 012'],
+        disc: [['Exclusion 7', 'eGFR under 45 (PROT §5.3)', 'Not in pre-screen log', 'High', 'Raise site query'], ['Re-consent', 'Required (AMD-2 p.6)', 'Site 012 on ICF v1.3', 'Medium', 'Raise site query']], bars: [7, 3, 4] },
+      mr: { label: 'Medical', who: 'Dr. Anita', short: 'safety & endpoints',
+        greet: 'Two safety-relevant mismatches between the Protocol, IB and ICF need your review before the data cut.',
+        kpis: [['Safety items to review', '4', '2 high severity'], ['Endpoint checks', '2', 'Protocol vs SAP'], ['AESI mentions', '3', 'Hypoglycaemia'], ['Summaries to approve', '2', 'Medical lens']],
+        lens: 'Medical lens · endpoints & safety',
+        pts: [['Primary endpoint: change in HbA1c at Week 24.', 'PROT §3.1 p.14'], ['10 mg daily; titrate to 20 mg at Week 4 if tolerated.', 'PROT §6.2 p.32'], ['Hypoglycaemia under 54 mg/dL is an AESI.', 'PROT §8.3 p.49'], ['Stop if ALT over 3x ULN with bilirubin over 2x ULN.', 'PROT §8.6 p.52'], ['Primary analysis: MMRM on full analysis set.', 'SAP §5.1 p.18']],
+        q: 'Compare the primary endpoint in Protocol vs SAP', a: 'Both use change in HbA1c at Week 24. The SAP names MMRM; the protocol only says "mixed model".', ac: 'PROT §3.1 p.14 · SAP §5.1 p.18',
+        sug: ['List adverse events of special interest', 'Summarize dose-modification rules', 'Which risks are missing from the ICF?'],
+        disc: [['Titration week', 'Week 4 (PROT §6.2)', 'Week 6 (IB §5)', 'High', 'Send to safety'], ['Hypoglycaemia risk', 'AESI (PROT §8.3)', 'Not in ICF §6', 'High', 'Send to safety']], bars: [4, 1, 6] },
+      aud: { label: 'Auditor', who: 'Meera', short: 'GxP review',
+        greet: 'Four AI outputs wait for your QA review and e-signature. One superseded protocol version is still cited by a live document.',
+        kpis: [['Documents controlled', '9', '2 superseded'], ['Awaiting sign-off', '4', 'GxP human-in-the-loop'], ['Review compliance', '92%', 'signed within SLA'], ['Rejected AI outputs', '2', 'this week']],
+        lens: 'Operations lens · Protocol v2.1', pts: [],
+        q: 'Who approved the medical summary for Protocol v2.1?', a: 'a.menon (Medical Reviewer) approved it on 27 Nov at 10:33. QA review and e-signature are still pending.', ac: 'Audit 1a6f…c3',
+        sug: ['Show the full trail for finding DSC-014', 'List AI outputs not yet e-signed', 'Which superseded versions are still cited?'], disc: [], bars: [6, 4, 17] },
+      adm: { label: 'Admin', who: 'Admin', short: 'all studies',
+        greet: 'The platform handled 312 requests today. 9 were blocked by guardrails and the audit chain is intact.',
+        kpis: [['Requests today', '312', '14 active users'], ['Guardrail blocks', '9', '6 PHI · 2 injection'], ['Avg groundedness', '0.93', '4 answers withheld'], ['Tokens saved', '61%', 'cache + cascade']],
+        lens: 'Operations lens · Protocol v2.1', pts: [], q: 'How many answers were withheld today?', a: 'Four answers scored below the 0.80 grounding threshold and were shown with sources only.', ac: 'Observability · traces',
+        sug: ['Show guardrail blocks by type', 'Which role uses the most tokens?', 'Verify the audit chain'], disc: [], bars: [12, 6, 21] }
+    };
+    const role = this.state.role, cur = R[role];
+    let view = this.state.view; if (view === 'admin' && role !== 'adm') view = 'dash'; if (view === 'ver' && role === 'adm') view = 'dash';
+    const navItems = [['dash', 'Dashboard'], ['docs', 'Documents & summaries'], ['disc', 'Discrepancies']].concat(role === 'adm' ? [['admin', 'Admin console']] : [['ver', 'Doc Audit Log']]);
+    const nav = navItems.map(([k, l]) => ({ label: l, pick: () => this.setState({ view: k }),
+      style: 'font:inherit;font-size:14px;text-align:left;min-height:42px;padding:0 12px;border:0;border-radius:9px;cursor:pointer;color:#FFFFFF;background:' + (k === view ? '#3B82C4' : 'transparent') + ';font-weight:' + (k === view ? '600' : '400') }));
+    const roles = Object.keys(R).map(k => ({ label: R[k].label, pick: () => this.setState({ role: k }),
+      style: 'font:inherit;font-size:13px;min-height:32px;padding:0 10px;border:0;border-radius:7px;cursor:pointer;background:' + (k === role ? '#1F6FB2' : 'transparent') + ';color:' + (k === role ? '#FFFFFF' : '#33414F') }));
+    const titles = { dash: 'Dashboard', docs: 'Documents & summaries', disc: 'Discrepancies', admin: 'Admin console', ver: 'Doc Audit Log' };
+    const S = { com: [89, 72, 80, 94, 67], cra: [89, 68, 74, 92, 55], mr: [89, 75, 70, 96, 62], aud: [89, 72, 76, 94, 52], adm: [89, 72, 76, 94, 60] };
+    const F = [['Document completeness', '8 of 9 expected documents present · DSMB charter missing'], ['Version consistency', 'ICF v1.3 still references Protocol v2.0; current is v2.1'], ['Cross-document consistency', '6 open conflicts across Protocol, ICF and IB'], ['Evidence coverage', '47 of 50 key facts link to a source page'], ['Review status', '9 of 15 AI findings validated by a reviewer']];
+    const sc = S[role];
+    const lvl = v => v >= 85 ? ['Good', '#067647', '#05603A'] : v >= 70 ? ['Watch', '#C27C0E', '#7A4504'] : ['Act', '#B42318', '#912018'];
+    const score = F.map(([n, d], i) => { const v = sc[i], l = lvl(v); return { n, d, v: v + '%', tag: l[0], tagStyle: 'width:44px;font-size:12px;font-weight:600;color:' + l[2], bar: 'height:8px;border-radius:4px;width:' + v + '%;background:' + l[1] }; });
+    const conf = Math.round(sc.reduce((x, y) => x + y, 0) / 5);
+    const ring = 'flex:none;width:88px;height:88px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:conic-gradient(#1F6FB2 0 ' + conf + '%, #D6E4F0 ' + conf + '% 100%)';
+    const A = {
+      com: [['High', 'Approve ICF v1.4 so it matches Protocol v2.1', 'Due 03 Dec', 'Review'], ['High', 'Roll out Amendment 2 visit worksheets to 38 sites', 'Due 05 Dec', 'Open'], ['Medium', '2 operations summaries awaiting your approval', 'Today', 'Approve']],
+      cra: [['High', 'Raise query: Exclusion 7 missing from site 012 pre-screen log', 'Today', 'Raise query'], ['High', 'Confirm re-consent at sites 012 and 019', 'Due 05 Dec', 'Open'], ['Medium', 'Validate 3 AI findings for your sites', 'Due 02 Dec', 'Validate']],
+      mr: [['High', 'Titration week differs: Protocol Week 4 vs IB Week 6', 'Due 01 Dec', 'Review'], ['High', 'Hypoglycaemia risk missing from ICF section 6', 'Due 01 Dec', 'Review'], ['Medium', 'Approve the medical-lens summary', 'Today', 'Approve']],
+      aud: [['GxP', 'Medical summary · Protocol v2.1', 'AI ✓ · Reviewer ✓ · QA review pending · e-sign —', 'Review & sign'], ['GxP', 'Discrepancy dismissal · SAP v1.0', 'AI ✓ · Reviewer ✓ · QA review pending · e-sign —', 'Review & sign'], ['GxP', 'Answer withheld · grounding 0.72', 'Below threshold · QA assessment needed', 'Assess'], ['GxP', 'Ops summary · Amendment 2', 'Waiting for reviewer s.iyer', 'Remind'], ['High', 'Protocol v2.0 still cited by ICF v1.3', 'Overdue · CAPA needed', 'Raise CAPA']],
+      adm: [['High', 'Investigate 2 prompt-injection attempts', 'Today', 'Investigate'], ['Medium', 'Review 4 answers withheld for low grounding', 'Today', 'Review'], ['Medium', 'Re-verify audit chain after threshold change', 'Due 30 Nov', 'Verify']]
+    };
+    const acts = A[role].map(([p, t, due, btn]) => ({ p, t, due, btn, pStyle: 'flex:none;width:64px;text-align:center;font-size:12px;font-weight:600;border-radius:999px;padding:3px 0;' + (p === 'GxP' ? 'background:#B42318;color:#FFFFFF' : p === 'High' ? 'background:#FDECEA;color:#912018' : 'background:#FDF3E1;color:#7A4504') }));
+    const C = {
+      com: [['Approved Protocol v2.1 operations summary', 'Completed 26 Nov'], ['Closed visit-count query with ICF owner', 'Completed 25 Nov']],
+      cra: [['Raised query Q-118 for site 012', 'Completed 26 Nov'], ['Validated 2 AI findings for site 019', 'Completed 25 Nov']],
+      mr: [['Sent titration mismatch to safety', 'Completed 26 Nov'], ['Approved endpoint comparison, Protocol vs SAP', 'Completed 24 Nov']],
+      aud: [['E-signed medical summary · IB v4', 'Signed 26 Nov · audit 5d20…8e'], ['Rejected ops summary v1 (unsupported claim)', 'Completed 25 Nov']],
+      adm: [['Raised grounding threshold to 0.80', 'Completed 27 Nov'], ['Re-verified audit chain', 'Completed 26 Nov']]
+    };
+    const done = this.state.actTab === 'done';
+    const shown = done ? C[role].map(([t, due]) => ({ p: 'Done', t, due, btn: 'View', pStyle: 'flex:none;width:64px;text-align:center;font-size:12px;font-weight:600;border-radius:999px;padding:3px 0;background:#E6F4EC;color:#05603A' })) : acts;
+    const actTabs = [['pend', 'Pending (' + acts.length + ')'], ['done', 'Completed (' + C[role].length + ')']].map(([k, l]) => { const on = (k === 'done') === done; return { label: l, sel: on ? 'true' : 'false', pick: () => this.setState({ actTab: k }),
+      style: 'font:inherit;font-size:13px;font-weight:600;min-height:36px;padding:0 12px;background:none;border:0;cursor:pointer;margin-bottom:-1px;border-bottom:3px solid ' + (on ? '#1F6FB2' : 'transparent') + ';color:' + (on ? '#1F6FB2' : '#4A5768') }; });
+    const V = [
+      ['Clinical Protocol', 'v2.1', 'Current', 'ok', [['v2.1', '12 Oct 2026', 'Current · approved'], ['v2.0', '02 Jun 2026', 'Superseded'], ['v1.0', '15 Jan 2026', 'Superseded']], 'Referenced by AMD-2 and SAP v1.0 (compatible). ICF v1.3 still points to v2.0.'],
+      ['Protocol Amendment 2', 'AMD-2', 'Current', 'ok', [['AMD-2', '12 Oct 2026', 'Current · approved']], 'Applies to Protocol v2.1 · compatible.'],
+      ['Informed Consent Form', 'v1.3', 'Outdated reference', 'warn', [['v1.4', 'draft', 'In review · not yet effective'], ['v1.3', '20 Jun 2026', 'Effective · references Protocol v2.0']], 'Should reference Protocol v2.1. Re-consent needed once v1.4 is effective.'],
+      ["Investigator's Brochure", 'v4', 'Conflict found', 'warn', [['v4', '01 Aug 2026', 'Current'], ['v3', '10 Feb 2026', 'Superseded']], 'Titration week differs from Protocol §6.2 (Week 6 vs Week 4).'],
+      ['DSMB Charter', 'none', 'Missing', 'miss', [], 'Expected for a Phase III study. No version uploaded.']
+    ];
+    const vi = this.state.vdoc ?? 0, vd = V[vi];
+    const stc = k => k === 'ok' ? '#05603A' : k === 'warn' ? '#7A4504' : '#912018';
+    const vdocs = V.map((d, i) => ({ n: d[0], ver: d[1], st: d[2], pick: () => this.setState({ vdoc: i }),
+      style: 'font:inherit;text-align:left;border:0;border-radius:8px;padding:10px 12px;cursor:pointer;display:flex;flex-direction:column;gap:2px;color:#0F1B2D;background:' + (i === vi ? '#DCEBF8' : 'transparent'),
+      stStyle: 'font-size:12px;font-weight:600;color:' + stc(d[3]) }));
+    const sev = s => 'font-size:12px;font-weight:600;border-radius:999px;padding:2px 10px;' + (s === 'High' ? 'background:#FDECEA;color:#912018' : 'background:#FDF3E1;color:#7A4504');
+    const mx = Math.max.apply(null, cur.bars);
+    const bars = [['Open', '#E58C8A'], ['Query raised', '#F2A65A'], ['Resolved', '#1F6FB2']].map(([label, c], i) => ({ label, n: cur.bars[i], bar: 'height:10px;border-radius:5px;background:' + c + ';width:' + Math.round(cur.bars[i] / mx * 100) + '%' }));
+    const pts = cur.pts.length ? cur.pts : R.com.pts;
+    const disc = (cur.disc.length ? cur.disc : R.com.disc.concat(R.cra.disc, R.mr.disc)).map(d => ({ i: d[0], a: d[1], b: d[2], sev: d[3], s: sev(d[3]), act: d[4] }));
+    const rg = (p, c) => 'width:92px;height:92px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:conic-gradient(' + c + ' 0 ' + p + '%, #D6E4F0 ' + p + '% 100%)';
+    const vbar = (n, m, c) => 'width:100%;max-width:48px;border-radius:6px 6px 0 0;background:' + c + ';height:' + Math.max(2, Math.round(n / m * 80)) + 'px';
+    const rings = [['82%', 'Sites active', '31 of 38', 82], ['80%', 'Subjects enrolled', '336 of 420', 80], ['30%', 'Subjects completed', '126 of 420', 30]].map(([v, l, d, p]) => ({ v, l, d, ring: rg(p, '#1F6FB2') }));
+    const tasks = [['Approve ICF v1.4', '03 Dec', 1], ['Complete AMD-2 site training', '29 Nov', 1], ['Review Protocol v2.1 summary', '04 Dec', 0], ['Sign site 027 close-out plan', '06 Dec', 0], ['Confirm DSMB charter owner', '28 Nov', 1]].slice(0, 3).map(([n, d, o]) => ({ n, d: 'Due ' + d, s: 'font-size:13px;white-space:nowrap;' + (o ? 'color:#B42318;font-weight:600' : 'color:#4A5768') }));
+    const phases = [['Pre-study', 4], ['Initiation', 6], ['Interim', 24], ['Close-out', 4]].map(([l, n]) => ({ l, n, bar: vbar(n, 24, '#6FA8DC') }));
+    const qtypes = [['SDV', 3], ['Source', 2], ['Image', 1], ['Meta', 1], ['EDC', 1]].map(([l, n]) => ({ l, n, bar: vbar(n, 3, '#F2A65A') }));
+    const craRings = [['Queries resolved', '25%', '2 of 8 raised', 25], ['ICF reviewed', '87%', '13 of 15 submitted', 87]].map(([l, v, d, p]) => ({ l, v, d, ring: rg(p, '#1F6FB2') }));
+    const icf = [['Site 012 · ICF v1.3 → v1.4', 'Submitted 24 Nov'], ['Site 019 · ICF v1.3 → v1.4', 'Submitted 25 Nov'], ['Site 031 · local language ICF', 'Submitted 26 Nov']].map(([a, b]) => ({ a, b }));
+    const qwait = [['Q-118 · Source data · Site 012', 'Raised 22 Nov'], ['Q-121 · Image · Site 019', 'Raised 24 Nov'], ['Q-124 · SDV · Site 012', 'Raised 26 Nov']].map(([a, b]) => ({ a, b }));
+    const pill = k => 'font-size:12px;font-weight:600;border-radius:999px;padding:2px 10px;' + (k === 'Active' ? 'background:#E6F4EC;color:#05603A' : k === 'Superseded' ? 'background:#FDF3E1;color:#7A4504' : 'background:#E8EEF7;color:#1D4E89');
+    const vctl = [['Clinical Protocol', 'v2.1', '12 Oct 2026', 'Active'], ['Clinical Protocol', 'v2.0', '02 Jun 2026', 'Superseded'], ['Informed Consent Form', 'v1.4', 'pending', 'In review'], ['Informed Consent Form', 'v1.3', '20 Jun 2026', 'Active'], ["Investigator's Brochure", 'v4', '01 Aug 2026', 'Active']].map(([n, v, d, st]) => ({ n, v, d, st, s: pill(st) }));
+    const aud = role === 'aud';
+    const boxInk = aud ? '#7A1A12' : '#6B3D04';
+    const boxStyle = 'flex:1 1 380px;min-width:0;border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;' + (aud ? 'background:#FFFFFF;border:2px solid #B42318' : 'background:#FFF8EC;border:2px solid #F2C27A');
+    const boxTitle = aud ? 'My Work · GxP sign-off required' : 'My Work';
+    const RF = { com: ['Priya Sharma', 'Clinical Operations Manager'], cra: ['Rahul Das', 'Clinical Research Associate'], mr: ['Dr. Anita Rao', 'Medical Reviewer'], aud: ['Meera Iyer', 'QA Auditor'], adm: ['Platform Admin', 'AI Platform Admin'] }[role];
+    return {
+      userName: RF[0], roleFull: RF[1], initials: RF[0].replace('Dr. ', '').split(' ').map(w => w[0]).join(''),
+      boxInk, boxStyle, boxTitle,
+      rings, tasks, phases, qtypes, craRings, icf, qwait, vctl,
+      isGen: role === 'mr' || role === 'adm', isCom: role === 'com', isCra: role === 'cra', isAud: role === 'aud',
+      score, conf, ring, acts: shown, actTabs, actCount: acts.length, vdocs, vName: vd[0], vStatus: vd[2], vStStyle: 'font-size:13px;font-weight:600;color:' + stc(vd[3]), vVers: vd[4].map(([v, dt, s]) => ({ v, dt, s })), vRef: vd[5], vMissing: vd[3] === 'miss', vHas: vd[3] !== 'miss', isVer: view === 'ver',
+      nav, roles, viewTitle: titles[view], who: cur.who, greet: cur.greet, roleShort: cur.short,
+      isDash: view === 'dash', isDocs: view === 'docs', isDisc: view === 'disc', isAdmin: view === 'admin',
+      kpis: cur.kpis.map(([label, value, note]) => ({ label, value, note })), bars,
+      lens: cur.lens, points: pts.map(p => ({ t: p[0], c: p[1] })), disc,
+      q: cur.q, a: cur.a, ac: cur.ac, suggest: cur.sug,
+      docs: [['Clinical Protocol', 'v2.1 · 96 pp · summary cached'], ['Protocol Amendment 2', 'AMD-2 · 12 pp'], ['Informed Consent Form', 'v1.3 · 14 pp'], ['Statistical Analysis Plan', 'v1.0 · 48 pp'], ["Investigator's Brochure", 'v4 · 120 pp']].map(([n, m]) => ({ n, m }))
+    };
+  }
+}
+
+class C_Admin extends DCLogic {
+  constructor(p){ super(p); this.state = { tab: 'obs', off: {} }; }
+  renderVals() {
+    const tab = this.state.tab;
+    const tabs = [['obs', 'AI observability'], ['audit', 'Audit trail'], ['guard', 'Guardrails & Responsible AI'], ['trace', 'Agent trace']].map(([k, l]) => ({ label: l, pick: () => this.setState({ tab: k }),
+      style: 'font:inherit;font-size:15px;font-weight:600;padding:10px 16px;min-height:44px;background:none;border:0;cursor:pointer;margin-bottom:-1px;border-bottom:3px solid ' + (k === tab ? '#1F6FB2' : 'transparent') + ';color:' + (k === tab ? '#1F6FB2' : '#4A5768') }));
+    const good = 'font-size:12px;color:#05603A', neutral = 'font-size:12px;color:#4A5768', warn = 'font-size:12px;color:#8A4B05';
+    const kpis = [['Requests', '312', '3 roles · 14 users', neutral], ['p95 latency', '3.1 s', 'target under 5 s', good], ['Tokens used', '412K', '61% saved vs naive RAG', good], ['LLM cost', '$0.38', '$0.0012 per request', neutral], ['Cache hit rate', '44%', 'semantic + summary cache', good], ['Avg groundedness', '0.93', '4 answers under 0.8 withheld', warn], ['Guardrail blocks', '9', '6 PHI · 2 injection · 1 scope', warn]]
+      .map(([label, value, note, noteStyle]) => ({ label, value, note, noteStyle }));
+    const pipe = [['Input guard', 'regex + rules', '35 ms', '0 tok'], ['Router', 'gpt-4.1-nano', '200 ms', '96 tok'], ['Cache lookup', 'embedding-3-large', '15 ms', '12 tok'], ['Retriever', 'BM25 + vector', '140 ms', '0 tok'], ['Specialist agent', 'gpt-4.1-mini', '1.5 s', '1.1K tok'], ['Verifier', 'gpt-4.1-mini / 4.1', '400 ms', '380 tok'], ['Output guard', 'rules', '20 ms', '0 tok']]
+      .map(([name, model, ms, tok]) => ({ name, model, ms, tok }));
+    const bar = (w, c) => 'height:10px;border-radius:5px;width:' + w + '%;background:' + c;
+    const models = [['gpt-4.1-mini', '268K tok', '$0.21', 65, '#1F6FB2'], ['gpt-4.1', '71K tok', '$0.14', 17, '#1D4E89'], ['gpt-4.1-nano', '30K tok', '$0.01', 8, '#6FA8DC'], ['text-embedding-3-large', '43K tok', '$0.02', 10, '#8A97A6']]
+      .map(([name, tok, cost, w, c]) => ({ name, tok, cost, bar: bar(w, c) }));
+    const savings = [['Section summaries built once at ingest, reused per role', '−212K'], ['Semantic cache for repeated questions', '−148K'], ['Model cascade (nano for routing)', '−61K'], ['Context compression: top-6 chunks, deduplicated', '−188K'], ['Structured JSON output, capped max_tokens', '−34K']]
+      .map(([what, saved]) => ({ what, saved }));
+    const pill = (bg, fg) => 'font-size:12px;font-weight:600;border-radius:999px;padding:2px 10px;background:' + bg + ';color:' + fg;
+    const ok = pill('#E6F4EC', '#05603A'), blk = pill('#FDECEA', '#912018'), held = pill('#FDF3E1', '#7A4504'), info = pill('#E8EEF7', '#1D4E89');
+    const traces = [['tr_8f21c', 'CRA', 'Q&A', '1,412', '2.4 s', '0.94', 'Answered', ok], ['tr_8f1d0', 'Medical Reviewer', 'Consistency check', '6,880', '7.9 s', '0.91', 'Answered', ok], ['tr_8f1b7', 'CRA', 'PHI request', '0', '0.04 s', '–', 'Blocked', blk], ['tr_8f19a', 'Clinical Ops Manager', 'Summary', '0', '0.08 s', '0.96', 'Cache hit', info], ['tr_8f172', 'Medical Reviewer', 'Q&A', '1,950', '3.0 s', '0.72', 'Withheld: low grounding', held]]
+      .map(([id, role, intent, tok, lat, g, out, st]) => ({ id, role, intent, tok, lat, g, out, st }));
+    const audit = [['10:42:07', 'p.rao · CRA', 'GUARDRAIL_BLOCK', 'Chat', 'PHI request at site 012', blk, '7c1e…a2', '9f3a…d1'], ['10:41:52', 'p.rao · CRA', 'QUERY', 'Protocol v2.1', 'Amendment 2 site actions · tr_8f21c', info, '44b0…19', '7c1e…a2'], ['10:39:15', 'a.menon · Medical Reviewer', 'DISCREPANCY_RAISE', 'IB v4 / Protocol', 'Titration week mismatch sent to safety', held, 'e92d…77', '44b0…19'], ['10:33:40', 's.iyer · Clinical Ops Manager', 'SUMMARY_APPROVE', 'Protocol v2.1', 'Operations lens summary approved', ok, '1a6f…c3', 'e92d…77'], ['10:30:02', 'svc-ingest', 'DOC_INGEST', 'ICF v1.3', '14 pp · 37 PHI entities masked', info, '5d20…8e', '1a6f…c3'], ['10:12:44', 'a.menon · Medical Reviewer', 'DISCREPANCY_DISMISS', 'SAP v1.0', 'Reason: wording difference only', held, 'b7c9…40', '5d20…8e'], ['09:58:11', 'admin', 'GUARDRAIL_CONFIG', 'Grounding threshold', 'Changed 0.75 → 0.80', info, '03fe…6b', 'b7c9…40']]
+      .map(([t, u, act, obj, d, st, p, h]) => ({ t, u, act, obj, d, st, p, h }));
+    const g0 = [['phi', 'PHI / PII redaction', 'Input', 'Masks names, dates, MRNs and contacts before any LLM call (HIPAA).', '37 masked'], ['inj', 'Prompt-injection detection', 'Input', 'Blocks instructions hidden in queries or document text.', '2 blocked'], ['scope', 'Role scope enforcement', 'Retrieval', 'Retriever only returns chunks tagged for the user’s role.', '1 blocked'], ['topic', 'Topic boundary', 'Input', 'Declines requests outside the trial documents, such as treatment advice.', '0'], ['ground', 'Grounding threshold ≥ 0.80', 'Output', 'Answers below the threshold are withheld and shown with sources only.', '4 withheld'], ['cite', 'Citation required', 'Output', 'Each claim must link to a retrieved chunk or it is dropped.', '11 dropped'], ['leak', 'Output PHI scan', 'Output', 'Second scan on the answer before it reaches the user.', '0'], ['budget', 'Token budget 8K per request', 'Cost', 'Caps context and output size; logs any overflow.', '0']];
+    const off = this.state.off;
+    const guards = g0.map(([id, name, stage, desc, hits]) => {
+      const on = !off[id];
+      return { name, stage, desc, hits, on: on ? 'true' : 'false',
+        toggle: () => this.setState({ off: { ...off, [id]: on } }),
+        track: 'flex:none;width:48px;height:28px;border-radius:999px;border:0;padding:3px;cursor:pointer;display:flex;justify-content:' + (on ? 'flex-end' : 'flex-start') + ';background:' + (on ? '#1F6FB2' : '#B5C0CC'),
+        knob: 'width:22px;height:22px;border-radius:50%;background:#FFFFFF;display:block' };
+    });
+    const rai = [['Transparency', '100% cited', 'Every answer shows sources, model and agent trace. AI content is labelled.'], ['Human oversight', '0 auto-closed', 'Agents suggest; reviewers approve, flag or dismiss with a reason.'], ['Privacy', '0 PHI to LLM', 'De-identified data only, redaction before prompts, no external storage.'], ['Reliability', '0.93 grounded', 'Verifier agent checks claims; low-confidence answers are withheld.'], ['Accountability', 'Chain intact', 'Hash-chained audit trail for every query, approval and setting change.'], ['Fairness of access', '3 role lenses', 'Same source of truth for every role; lenses change emphasis, not facts.']]
+      .map(([p, m, how]) => ({ p, m, how }));
+    const spans = [['Input guard', 'rules', '0', '38 ms', 'PHI + injection scan passed; role scope = CRA', '#067647'], ['Router', 'gpt-4.1-nano', '96', '210 ms', 'intent = qa, confidence 0.97', '#067647'], ['Semantic cache', 'embedding-3-large', '12', '12 ms', 'miss: best similarity 0.81 under 0.92', '#8A97A6'], ['Retriever', 'BM25 + vector', '0', '140 ms', '6 of 214 chunks, role-filtered: AMD-2 p.6, PROT §6.3 …', '#067647'], ['Q&A agent', 'gpt-4.1-mini', '1,040 in / 74 out', '1.6 s', 'prompt v3 · temperature 0 · JSON output', '#067647'], ['Verifier', 'gpt-4.1-mini', '190', '380 ms', '3 of 3 claims supported · groundedness 0.94', '#067647'], ['Output guard', 'rules', '0', '22 ms', 'PHI scan clean · AI disclaimer added', '#067647']]
+      .map(([n, m, t, ms, d, c]) => ({ n, m, t, ms, d, dot: 'flex:none;width:12px;height:12px;border-radius:50%;margin-top:4px;background:' + c }));
+    return { tabs, kpis, pipe, models, savings, traces, audit, guards, rai, isObs: tab === 'obs', isAudit: tab === 'audit', isGuard: tab === 'guard', isTrace: tab === 'trace', spans };
+  }
+}
+
+const App={screen:'Main',inst:{},
+ get(n){return this.inst[n]||(this.inst[n]=new (window['C_'+n]||eval('C_'+n))({}))},
+ look(scope,p){p=p.trim();if(p==='true')return true;if(p==='false')return false;if(/^-?\d+(\.\d+)?$/.test(p))return +p;if(/^['"].*['"]$/.test(p))return p.slice(1,-1);return p.split('.').reduce((o,k)=>o==null?o:o[k],scope)},
+ interp(scope,s){return s.replace(/\{\{(.*?)\}\}/g,(m,p)=>{const v=this.look(scope,p);return v==null?'':v})},
+ comp(n){const c=this.get(n);const vals=c.renderVals();const f=document.createDocumentFragment();this.walk(document.getElementById('tpl-'+n).content,vals,f);return f},
+ walk(src,scope,out){for(const nd of src.childNodes){
+  if(nd.nodeType===3){out.appendChild(document.createTextNode(nd.nodeValue.includes('{{')?this.interp(scope,nd.nodeValue):nd.nodeValue));continue}
+  if(nd.nodeType!==1)continue;
+  if(nd.tagName==='TEMPLATE'){
+   if(nd.hasAttribute('data-for')){const raw=nd.getAttribute('list').replace(/^\{\{|\}\}$/g,'');const list=this.look(scope,raw)||[];const as=nd.getAttribute('as')||'item';list.forEach((it,i)=>this.walk(nd.content,Object.assign({},scope,{[as]:it,$index:i}),out))}
+   else if(nd.hasAttribute('data-if')){const raw=nd.getAttribute('value').replace(/^\{\{|\}\}$/g,'');if(this.look(scope,raw))this.walk(nd.content,scope,out)}
+   else if(nd.hasAttribute('data-import')){out.appendChild(this.comp(nd.getAttribute('name')))}
+   continue}
+  const el=nd.cloneNode(false);
+  for(const a of [...el.attributes]){const v=a.value;if(!v.includes('{{')){if(a.name==='href'&&/\.dc\.html$/.test(v))this.link(el,v);continue}
+   const whole=v.match(/^\{\{([^}]*)\}\}$/);const val=whole?this.look(scope,whole[1]):this.interp(scope,v);
+   if(a.name.startsWith('on')){el.removeAttribute(a.name);if(typeof val==='function')el.addEventListener(a.name.slice(2),e=>{val(e)});continue}
+   el.setAttribute(a.name,val==null?'':String(val));if(a.name==='href'&&/\.dc\.html$/.test(String(val)))this.link(el,String(val))}
+  this.walk(nd,scope,el);out.appendChild(el)}},
+ link(el,v){el.addEventListener('click',e=>{e.preventDefault();App.screen=v.replace(/^.*\//,'').replace('.dc.html','');if(App.screen==='Workspace'&&App.inst.Main){const w=App.get('Workspace');w.state.role=App.inst.Main.state.picked||'com';w.state.view='dash'}App.render();try{window.scrollTo(0,0)}catch(_){}})},
+ render(){const r=document.getElementById('root');const ae=document.activeElement,id=ae&&ae.id,ss=ae&&ae.selectionStart;r.replaceChildren(this.comp(this.screen));if(id){const n=document.getElementById(id);if(n){n.focus();try{if(ss!=null)n.setSelectionRange(ss,ss)}catch(_){}}}}};
+document.addEventListener('click',e=>{const a=e.target.closest('a[href="#"]');if(a)e.preventDefault()});
+App.render();
+
+</script></body></html>
